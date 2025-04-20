@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import com.penaltygame.Shoot.FirstScreen;
 
 public class QuarterFinal extends BaseScreen {
 
@@ -116,13 +117,15 @@ public class QuarterFinal extends BaseScreen {
         playButton.setSize(300, 150); // PNG'nin orijinal boyutuna göre ayarla
         playButton.setPosition(Gdx.graphics.getWidth() - 300, 20);
 
+        // en üste ekle
+
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Yarı finale geçilebilir.");
-                // game.setScreen(new SemiFinal(...));
+                game.setScreen(new FirstScreen(game)); // FirstScreen'e geçiş
             }
         });
+
 
         stage.addActor(playButton);
 
