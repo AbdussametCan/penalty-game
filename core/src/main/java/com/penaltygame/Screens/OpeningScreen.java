@@ -39,6 +39,6 @@ public class OpeningScreen extends com.penaltygame.Screens.BaseScreen {
             }
         });
 
-        table.add(startButton).padBottom(10).row();
+        table.add(startButton).padBottom(-235).row();
     }
 }
