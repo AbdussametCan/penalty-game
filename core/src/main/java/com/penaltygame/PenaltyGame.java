@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.penaltygame.Screens.OpeningScreen;
+import com.penaltygame.Shoot.FirstScreen;
 
 public class PenaltyGame extends Game {
 
@@ -47,9 +48,6 @@ public class PenaltyGame extends Game {
         assetManager.load("InterfacePng/Trophy/worldtrophy.png", Texture.class);
         assetManager.load("InterfacePng/Trophy/eurotrophy.png", Texture.class);
 
-
-
-
         // UI Skin
         assetManager.load("uiskin.json", Skin.class);
 
@@ -59,7 +57,16 @@ public class PenaltyGame extends Game {
         assetManager.load("GameSong/eurosong.mp3", Music.class);
         assetManager.load("GameSong/nosasong.mp3", Music.class);
 
-        // Yüklemeyi bitir
+
+
+        //Shoot assetleri
+        assetManager.load("Shoot/ball.png", Texture.class);
+        assetManager.load("Shoot/bar_1.png", Texture.class);
+        assetManager.load("Shoot/bar_2.png", Texture.class);
+        assetManager.load("Shoot/bar_3.png", Texture.class);
+
+
+        // Asset'lerin yüklenmesini bekle
         assetManager.finishLoading();
 
         // Müzikleri Al
@@ -70,9 +77,7 @@ public class PenaltyGame extends Game {
 
         // Müzik sırasını oluştur
         musicQueue = new Music[] { fifaSong, wakaSong, euroSong, nosaSong };
-
-        // İlk şarkıyı çalmaya başla
-        playNextSong();
+        playNextSong(); // Müzik başlat
 
         // ✅ Tam ekran modu sadece masaüstünde aktif edilsin
         if (Gdx.app.getType() == Application.ApplicationType.Desktop) {
@@ -82,47 +87,41 @@ public class PenaltyGame extends Game {
             }
         }
 
-        // İlk ekranı başlat
+        // İlk ekranı FirstScreen olarak ayarla
         setScreen(new OpeningScreen(this));
     }
 
-    // Müziklerin sırayla çalmasını sağla
     private void playNextSong() {
         if (currentSongIndex < musicQueue.length) {
             Music currentMusic = musicQueue[currentSongIndex];
-            currentMusic.setOnCompletionListener(new Music.OnCompletionListener() {
-                @Override
-                public void onCompletion(Music music) {
-                    currentSongIndex++;  // Bir sonraki şarkıya geç
-                    if (currentSongIndex >= musicQueue.length) {
-                        currentSongIndex = 0; // Eğer 4. şarkıya geldiysek, 1. şarkıya dön
-                    }
-                    playNextSong(); // Sıradaki şarkıyı çalmaya başla
+            currentMusic.setOnCompletionListener(music -> {
+                currentSongIndex++;
+                if (currentSongIndex >= musicQueue.length) {
+                    currentSongIndex = 0;
                 }
+                playNextSong();
             });
             currentMusic.play();
         }
     }
 
-    // Next butonuna basıldığında şarkıyı hemen geç
     public void skipToNextSong() {
         if (currentSongIndex < musicQueue.length) {
             Music currentMusic = musicQueue[currentSongIndex];
-            currentMusic.stop(); // Mevcut şarkıyı durdur
-            currentSongIndex++;  // Sonraki şarkıya geç
+            currentMusic.stop();
+            currentSongIndex++;
             if (currentSongIndex >= musicQueue.length) {
-                currentSongIndex = 0; // Eğer 4. şarkıya geldiysek, 1. şarkıya dön
+                currentSongIndex = 0;
             }
-            playNextSong(); // Yeni şarkıyı çalmaya başla
+            playNextSong();
         }
     }
 
-    // Ses butonunun çalışmasını yönet
     public void toggleSound(boolean isOn) {
         if (isOn) {
             Music currentMusic = musicQueue[currentSongIndex];
             if (!currentMusic.isPlaying()) {
-                currentMusic.play(); // Sadece mevcut şarkıyı çal
+                currentMusic.play();
             }
         } else {
             stopAllMusic();
@@ -140,6 +139,11 @@ public class PenaltyGame extends Game {
     public Music getCurrentMusic() {
         return musicQueue[currentSongIndex];
     }
+
+    public SpriteBatch getBatch() {
+        return batch;
+    }
+
 
     @Override
     public void render() {

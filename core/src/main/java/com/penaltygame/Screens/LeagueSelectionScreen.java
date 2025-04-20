@@ -43,7 +43,7 @@ public class LeagueSelectionScreen extends BaseScreen {
             "InterfacePng/Trophy/eurotrophy.png");
 
         addLeagueButton(table, "World Cup", skin,
-            new String[]{"Argentina", "France", "Brazil", "Spain", "Senegal", "Uruguay", "Cameroon", "Turkey"},
+            new String[]{"Argentina", "France", "Brazil", "Spain", "Senegal", "Turkey", "Uruguay", "Cameroon"},
             "InterfacePng/worldcup.png",
             "InterfacePng/Trophy/worldtrophy.png");
 
