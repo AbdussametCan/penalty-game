@@ -65,6 +65,9 @@ public class PenaltyGame extends Game {
         assetManager.load("Shoot/bar_2.png", Texture.class);
         assetManager.load("Shoot/bar_3.png", Texture.class);
 
+        //SAHA
+        assetManager.load("field_background.png",Texture.class);
+
 
         // Asset'lerin yüklenmesini bekle
         assetManager.finishLoading();

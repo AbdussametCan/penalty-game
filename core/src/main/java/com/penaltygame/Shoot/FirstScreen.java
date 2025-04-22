@@ -8,7 +8,7 @@ import com.penaltygame.PenaltyGame;
 
 public class FirstScreen implements Screen {
     final PenaltyGame game;
-    Texture ballTexture, directionBar, heightBar, powerBar;
+    Texture ballTexture, directionBar, heightBar, powerBar, backgroundTexture;
     Vector2 ballPosition;
     Vector2 velocity;
 
@@ -29,12 +29,13 @@ public class FirstScreen implements Screen {
     public FirstScreen(final PenaltyGame game) {
         this.game = game;
 
+        backgroundTexture = new Texture("field_background.png");
         ballTexture = new Texture("Shoot/ball.png");
         directionBar = new Texture("Shoot/bar_1.png");
         heightBar = new Texture("Shoot/bar_2.png");
         powerBar = new Texture("Shoot/bar_3.png");
 
-        ballPosition = new Vector2(400, 100);
+        ballPosition = new Vector2(960, 150);
         velocity = new Vector2();
 
         Gdx.input.setInputProcessor(new InputAdapter() {
@@ -117,10 +118,11 @@ public class FirstScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        updateBar(delta);
+        game.batch.begin();
+        game.batch.draw(backgroundTexture, 0, 0);
+        game.batch.end();
 
-        Gdx.gl.glClearColor(0, 0.5f, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        updateBar(delta);
 
         if (isShooting) {
             ballPosition.mulAdd(velocity, delta);
@@ -182,7 +184,7 @@ public class FirstScreen implements Screen {
 
 
     public void reset() {
-        ballPosition.set(400, 100);
+        ballPosition.set(960, 150);
         velocity.set(0, 0);
         isShooting = false;
     }
