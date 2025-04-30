@@ -1,9 +1,20 @@
 package com.penaltygame.Oyun;
 
+import com.badlogic.gdx.math.Rectangle;
+
 public class Kale {
-    public boolean checkGoal(String ballDirection, String keeperDirection) {
-        boolean isGoal = !ballDirection.equals(keeperDirection);
-        System.out.println(isGoal ? "GOOOL!" : "Kurtardı!");
-        return isGoal;
+    private Rectangle alan;
+
+    public Kale(float x, float y, float width, float height) {
+        alan = new Rectangle(x, y, width, height);
     }
+
+    public boolean golMu(float topX, float topY) {
+        return alan.contains(topX, topY);
+    }
+
+    public Rectangle getAlan() {
+        return alan;
+    }
+
 }
