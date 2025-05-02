@@ -3,19 +3,19 @@ package com.penaltygame.Screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.penaltygame.PenaltyGame;
+import com.penaltygame.Shoot.FirstScreen;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import com.penaltygame.Shoot.FirstScreen;
 
 public class QuarterFinal extends BaseScreen {
 
@@ -24,29 +24,24 @@ public class QuarterFinal extends BaseScreen {
     private final String imagePath;
     private final String trophyPath;
 
-
     public QuarterFinal(PenaltyGame game, String[] teams, String selectedTeam, String imagePath, String trophyPath) {
         super(game);
         this.teams = teams;
         this.selectedTeam = selectedTeam;
         this.imagePath = imagePath;
         this.trophyPath = trophyPath;
-
-
     }
 
     @Override
     protected void addContent() {
         Skin skin = game.assetManager.get("uiskin.json", Skin.class);
 
-        // 1. Bracket görselini yükle
         Texture bracketTexture = new Texture(Gdx.files.internal("bracket.png"));
         Image bracketImage = new Image(bracketTexture);
 
         float scale = 1.5f;
-        float originalWidth = bracketTexture.getWidth();  // 1280
-        float originalHeight = bracketTexture.getHeight(); // 401
-
+        float originalWidth = bracketTexture.getWidth();
+        float originalHeight = bracketTexture.getHeight();
         float scaledWidth = originalWidth * scale;
         float scaledHeight = originalHeight * scale;
 
@@ -54,47 +49,34 @@ public class QuarterFinal extends BaseScreen {
 
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
-
         bracketImage.setPosition((screenWidth - scaledWidth) / 2f, (screenHeight - scaledHeight) / 2f);
-
         stage.addActor(bracketImage);
 
-        // Takımları karıştır
-        List<String> shuffled = new ArrayList<>(Arrays.asList(teams));
-        Collections.shuffle(shuffled);
+        // Takımları sabit sırada tut
+        List<String> ordered = new ArrayList<>(Arrays.asList(teams));
 
         float[][] positions = {
-            // Sol taraf (üstten aşağı)
             {90, 685},
             {90, 575},
             {90, 461},
             {90, 350},
-
-            // Sağ taraf
-            {1665, 685},
-            {1665, 575},
-            {1665, 461},
-            {1665, 350}
+            {screenWidth - 260, 685},
+            {screenWidth - 260, 575},
+            {screenWidth - 260, 461},
+            {screenWidth - 260, 350}
         };
 
         for (int i = 0; i < 8; i++) {
-            String team = shuffled.get(i);
+            String team = ordered.get(i);
 
-            TextButton teamButton = new TextButton(team, skin);
-            teamButton.setSize(170, 45);
-            teamButton.setPosition(positions[i][0], positions[i][1]);
-            teamButton.getLabel().setFontScale(1f);
-            teamButton.getLabel().setAlignment(Align.center);
-
+            TextButton teamButton;
             if (team.equals(selectedTeam)) {
-                // Kırmızı görünümlü buton stili
                 TextButton.TextButtonStyle redStyle = new TextButton.TextButtonStyle();
-                redStyle.up = skin.getDrawable("default-round-down"); // basılmış görünüm
+                redStyle.up = skin.getDrawable("default-round-down");
                 redStyle.font = skin.getFont("default-font");
-
                 teamButton = new TextButton(team, redStyle);
+                teamButton.getLabel().setColor(Color.YELLOW);
             } else {
-                // Normal stil
                 teamButton = new TextButton(team, skin);
             }
 
@@ -103,10 +85,6 @@ public class QuarterFinal extends BaseScreen {
             teamButton.getLabel().setFontScale(1f);
             teamButton.getLabel().setAlignment(Align.center);
 
-            if (team.equals(selectedTeam)) {
-                teamButton.getLabel().setColor(Color.YELLOW); // İstersen kaldırabiliriz
-            }
-
             stage.addActor(teamButton);
         }
 
@@ -114,32 +92,28 @@ public class QuarterFinal extends BaseScreen {
         TextureRegionDrawable playDrawable = new TextureRegionDrawable(new TextureRegion(playTexture));
 
         ImageButton playButton = new ImageButton(playDrawable);
-        playButton.setSize(300, 150); // PNG'nin orijinal boyutuna göre ayarla
-        playButton.setPosition(Gdx.graphics.getWidth() - 300, 20);
-
-        // en üste ekle
+        playButton.setSize(300, 150);
+        playButton.setPosition(screenWidth - 300, 20);
 
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new FirstScreen(game)); // FirstScreen'e geçiş
+                List<String> kalanlar = new ArrayList<>(Arrays.asList(teams));
+                kalanlar.remove(selectedTeam);
+                Collections.shuffle(kalanlar);
+                String rakipTeam = kalanlar.get(0);
+                game.setScreen(new FirstScreen(game, selectedTeam, rakipTeam));
             }
         });
 
-
         stage.addActor(playButton);
 
-        //ROAD TO THE FİNAL
         Texture roadTexture = game.assetManager.get("InterfacePng/roadfinal.png", Texture.class);
         Image roadImage = new Image(roadTexture);
         roadImage.setSize(1000, 200);
+        roadImage.setPosition((screenWidth - roadImage.getWidth()) / 2f, screenHeight - roadImage.getHeight() - 75);
+        stage.addActor(roadImage);
 
-        roadImage.setPosition(
-            (screenWidth - roadImage.getWidth()) / 2f,
-            screenHeight - roadImage.getHeight() - 75 // üstten biraz boşluk bırak
-        );
-
-        // Lig Kupası
         Texture trophyTexture = game.assetManager.get(trophyPath, Texture.class);
         Image trophyImage = new Image(trophyTexture);
         float trophyWidth = 350;
@@ -150,12 +124,6 @@ public class QuarterFinal extends BaseScreen {
         trophyImage.setPosition(centerX, centerY);
         stage.addActor(trophyImage);
 
-        stage.addActor(roadImage);
-
-
-
-
         addBackButton(() -> game.setScreen(new TeamSelectionScreen(game, teams, imagePath, trophyPath)));
-
     }
 }
