@@ -8,7 +8,7 @@ public class PenaltyBot{
         OyuncuBot oyuncu = new OyuncuBot();
 
         oyuncu.sutHesapla();
-        String botKarar = kaleci.yonBelirle(oyuncu.sutYonu);
-        kaleci.setMevcutHareket(botKarar);
+        //String botKarar = kaleci.yonBelirle(oyuncu.sutYonu);
+        //kaleci.setMevcutHareket(botKarar);
     }
 }

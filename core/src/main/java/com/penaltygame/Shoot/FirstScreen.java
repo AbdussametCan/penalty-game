@@ -12,63 +12,48 @@ import com.penaltygame.Oyun.SkorBoard;
 
 public class FirstScreen implements Screen {
     final PenaltyGame game;
-    Texture ballTexture, backgroundTexture, goalkeeperTexture;
-    Vector2 ballPosition, velocity, kaleciPozisyon;
+    Texture ballTexture, backgroundTexture;
+    Vector2 kaleciPozisyon;
     Kale kale;
     Kaleci kaleci;
     SkorBoard skorBoard;
+    Shoot shoot;
 
     BitmapFont font = new BitmapFont();
     ShapeRenderer shapeRenderer = new ShapeRenderer();
 
     int clickStage = 0;
     boolean oyuncuSirasi = true;
-    boolean directionLocked = false, powerLocked = false, isShooting = false;
     boolean golOldu = false, kurtardi = false, oyunBitti = false;
-    float directionTimer = 0f, powerTimer = 0f;
-    boolean directionIncreasing = true, powerIncreasing = true;
-    float directionValue = 0f, powerValue = 0f;
     float mesajTimer = 0f;
 
     int atisSayisiOyuncu = 0, atisSayisiBot = 0;
     final int maxAtis = 5;
+    boolean kaleciKararVerdi = false;
 
-    String topYonu = "", kazananTakim = "";
+    String kazananTakim = "";
 
     public FirstScreen(final PenaltyGame game, String takim1, String takim2) {
         this.game = game;
         ballTexture = new Texture("Shoot/ball.png");
         backgroundTexture = new Texture("field_background.png");
 
-        try {
-            goalkeeperTexture = new Texture("goalkeeper_idle.png");
-        } catch (Exception e) {
-            goalkeeperTexture = null;
-        }
-
         kale = new Kale(500, 430, 920, 270);
-        kaleci = new Kaleci("Bot");
+        kaleci = new Kaleci(game.assetManager);
         skorBoard = new SkorBoard(takim1, takim2);
-        ballPosition = new Vector2(960, 150);
-        velocity = new Vector2();
         kaleciPozisyon = new Vector2(910, 430);
+        shoot = new Shoot();
 
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean touchDown(int x, int y, int pointer, int button) {
-                if (isShooting || oyunBitti || !oyuncuSirasi) return false;
+                if (shoot.isShooting() || oyunBitti || !oyuncuSirasi) return false;
 
                 if (clickStage == 0) {
-                    directionValue = directionTimer;
-                    directionLocked = true;
+                    shoot.lockDirection();
                     clickStage++;
                 } else if (clickStage == 1) {
-                    powerValue = powerTimer;
-                    powerLocked = true;
-                    kaleci.yeniYonSec();
-                    setKaleciPozisyon();
-                    shootBall();
-                    directionLocked = powerLocked = false;
+                    shoot.lockPower();
                     clickStage = 0;
                 }
                 return true;
@@ -76,56 +61,11 @@ public class FirstScreen implements Screen {
         });
     }
 
-    private void setKaleciPozisyon() {
-        switch (kaleci.getSecilenYon()) {
-            case "left": kaleciPozisyon.set(750, 430); break;
-            case "right": kaleciPozisyon.set(1070, 430); break;
-            default: kaleciPozisyon.set(910, 430); break;
-        }
-    }
-
-    private void updateBars(float delta) {
-        if (!directionLocked) {
-            directionTimer += (directionIncreasing ? 1 : -1) * delta;
-            if (directionTimer >= 1f) {
-                directionTimer = 1f;
-                directionIncreasing = false;
-            } else if (directionTimer <= 0f) {
-                directionTimer = 0f;
-                directionIncreasing = true;
-            }
-        }
-
-        if (!powerLocked && directionLocked) {
-            powerTimer += (powerIncreasing ? 1 : -1) * delta;
-            if (powerTimer >= 1f) {
-                powerTimer = 1f;
-                powerIncreasing = false;
-            } else if (powerTimer <= 0f) {
-                powerTimer = 0f;
-                powerIncreasing = true;
-            }
-        }
-    }
-
-    private void shootBall() {
-        float angle = directionValue * 180f;
-        float speed = 300f + powerValue * 400f;
-        float rad = (float) Math.toRadians(angle);
-        Vector2 dir = new Vector2((float) Math.cos(rad), (float) Math.sin(rad)).nor();
-
-        velocity.set(dir.scl(speed));
-        isShooting = true;
-
-        topYonu = angle < 60 ? "right" : angle > 120 ? "left" : "center";
-    }
-
     private void tamamlaSira() {
+        kaleciKararVerdi = false;
         if (oyuncuSirasi) atisSayisiOyuncu++;
         else atisSayisiBot++;
 
-        // 🏁 Bitirme koşulları
-        boolean maxReached = atisSayisiOyuncu >= maxAtis && atisSayisiBot >= maxAtis;
         boolean oyuncuKazandi = skorBoard.getSkorSaldiran() > skorBoard.getSkorSavunan();
         boolean botKazandi = skorBoard.getSkorSavunan() > skorBoard.getSkorSaldiran();
 
@@ -133,70 +73,66 @@ public class FirstScreen implements Screen {
             if (atisSayisiOyuncu == atisSayisiBot) {
                 if (oyuncuKazandi || botKazandi) {
                     oyunBitti = true;
-                    kazananTakim = oyuncuKazandi
-                        ? skorBoard.getTakimSaldiran()
-                        : skorBoard.getTakimSavunan();
+                    kazananTakim = oyuncuKazandi ? skorBoard.getTakimSaldiran() : skorBoard.getTakimSavunan();
                     return;
                 }
             } else if (skorBoard.getSkorSaldiran() > skorBoard.getSkorSavunan() + (maxAtis - atisSayisiBot) ||
                 skorBoard.getSkorSavunan() > skorBoard.getSkorSaldiran() + (maxAtis - atisSayisiOyuncu)) {
                 oyunBitti = true;
-                kazananTakim = oyuncuKazandi
-                    ? skorBoard.getTakimSaldiran()
-                    : skorBoard.getTakimSavunan();
+                kazananTakim = oyuncuKazandi ? skorBoard.getTakimSaldiran() : skorBoard.getTakimSavunan();
                 return;
             }
         }
 
-        // Sırayı değiştir ve imleç/güç sıfırla
         oyuncuSirasi = !oyuncuSirasi;
-        directionTimer = 0f;
-        directionIncreasing = true;
-        powerTimer = 0f;
-        powerIncreasing = true;
-        directionLocked = powerLocked = false;
         clickStage = 0;
+        shoot.reset();
     }
 
     @Override
     public void render(float delta) {
-        updateBars(delta);
+        shoot.updateBars(delta);
 
         if ((golOldu || kurtardi) && (mesajTimer -= delta) <= 0) {
             golOldu = kurtardi = false;
             tamamlaSira();
         }
 
-        if (isShooting) {
-            ballPosition.mulAdd(velocity, delta);
-            if (ballPosition.y > 250 && ballPosition.y < 400 &&
-                kaleci.getSecilenYon().equals(topYonu)) {
+        if (shoot.isShooting()) {
+            if (!kaleciKararVerdi) {
+                kaleci.yeniYonSec(shoot.getTopYonu());
+                kaleci.yukseklikAyarla(shoot.getBallPosition().y);
+                kaleciKararVerdi = true;
+            }
+
+            shoot.updateBall(delta);
+            if (shoot.isSaved(kaleci.getSecilenYon())) {
                 kurtardi = true;
                 skorBoard.kurtardi();
                 mesajTimer = 2f;
-                isShooting = false;
-                reset();
-            } else if (ballPosition.x >= kale.getAlan().x &&
-                ballPosition.x <= kale.getAlan().x + kale.getAlan().width &&
-                ballPosition.y >= kale.getAlan().y + kale.getAlan().height / 2) {
+                shoot.reset();
+            } else if (shoot.isGoal(kale)) {
                 golOldu = true;
                 skorBoard.golAtti();
                 mesajTimer = 2f;
-                isShooting = false;
-                reset();
-            } else if (ballPosition.x < 0 || ballPosition.x > Gdx.graphics.getWidth() ||
-                ballPosition.y < 0 || ballPosition.y > Gdx.graphics.getHeight()) {
-                isShooting = false;
-                reset();
+                shoot.reset();
+            } else if (shoot.isShotComplete(kale)) {
+                shoot.reset();
                 tamamlaSira();
             }
         }
 
         game.batch.begin();
         game.batch.draw(backgroundTexture, 0, 0);
-        game.batch.draw(ballTexture, ballPosition.x - 16, ballPosition.y - 16, 32, 32);
-        if (goalkeeperTexture != null)
-            game.batch.draw(goalkeeperTexture, kaleciPozisyon.x, kaleciPozisyon.y, 64, 96);
+        Vector2 pos = shoot.getBallPosition();
+        game.batch.draw(ballTexture, pos.x - 16, pos.y - 16, 32, 32);
+
+        float kaleciWidth = 200f;
+        float kaleciHeight = 240f;
+        float kaleciX = kale.getAlan().x + (kale.getAlan().width - kaleciWidth) / 2f;
+        float kaleciY = kale.getAlan().y - 50;
+
+        game.batch.draw(kaleci.getPozisyonTexture(), kaleciX, kaleciY, kaleciWidth, kaleciHeight);
 
         font.getData().setScale(4f);
         if (golOldu) font.draw(game.batch, "GOOOOL!", 700, 600);
@@ -210,7 +146,6 @@ public class FirstScreen implements Screen {
         game.batch.end();
 
         drawIndicators();
-
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.RED);
         shapeRenderer.rect(kale.getAlan().x, kale.getAlan().y, kale.getAlan().width, kale.getAlan().height);
@@ -218,11 +153,12 @@ public class FirstScreen implements Screen {
     }
 
     private void drawIndicators() {
-        if (isShooting || oyunBitti) return;
+        if (shoot.isShooting() || oyunBitti) return;
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        if (!directionLocked) {
-            float angle = directionTimer * 180f;
+
+        if (!shoot.isDirectionLocked()) {
+            float angle = shoot.getDirectionTimer() * 180f;
             float rad = (float) Math.toRadians(angle);
             float length = 100f;
             float startX = 960, startY = 150;
@@ -232,24 +168,17 @@ public class FirstScreen implements Screen {
             shapeRenderer.rectLine(startX, startY, endX, endY, 5f);
         }
 
-        if (!powerLocked && directionLocked) {
+        if (!shoot.isPowerLocked() && shoot.isDirectionLocked()) {
             shapeRenderer.setColor(Color.BLUE);
-            shapeRenderer.rect(50, 50, 20, powerTimer * 150);
+            shapeRenderer.rect(50, 50, 20, shoot.getPowerTimer() * 150);
         }
 
         shapeRenderer.end();
     }
 
-    public void reset() {
-        ballPosition.set(960, 150);
-        velocity.set(0, 0);
-        isShooting = false;
-    }
-
     @Override public void dispose() {
         ballTexture.dispose();
         backgroundTexture.dispose();
-        if (goalkeeperTexture != null) goalkeeperTexture.dispose();
         shapeRenderer.dispose();
     }
 

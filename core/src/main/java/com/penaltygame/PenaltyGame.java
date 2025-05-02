@@ -68,6 +68,13 @@ public class PenaltyGame extends Game {
         //SAHA
         assetManager.load("field_background.png",Texture.class);
 
+        //KALECİ
+        assetManager.load("Kaleci/orta.png", Texture.class);
+        assetManager.load("Kaleci/sag_üst.png", Texture.class);
+        assetManager.load("Kaleci/sag_alt.png", Texture.class);
+        assetManager.load("Kaleci/sol_alt.png", Texture.class);
+        assetManager.load("Kaleci/sol_üst.png", Texture.class);
+
 
         // Asset'lerin yüklenmesini bekle
         assetManager.finishLoading();

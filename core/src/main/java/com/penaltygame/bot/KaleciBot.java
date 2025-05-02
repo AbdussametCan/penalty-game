@@ -1,51 +1,52 @@
 package com.penaltygame.bot;
 
+import java.util.Random;
+
 public class KaleciBot {
+    private String secilenYon = "center"; // left, center, right
+    private String yukseklik = "alt";     // alt, üst
+    private Random random = new Random();
 
-    private final float tahminBasarisi = 0.5f;
-    private String mevcutHareket = "bos";
-
-    public String yonBelirle(float hedefYon){
-
-        float rastgele = (float) Math.random();
-
-        if(rastgele < tahminBasarisi)
-        {
-            if(hedefYon < -0.25f)
-            {
-                return "sol";
+    // Oyuncunun gerçek yönüne göre %50 tahmin etsin
+    public void yeniYonSec(String topYonGercek) {
+        boolean dogruTahmin = random.nextBoolean(); // %50 ihtimalle true
+        if (dogruTahmin) {
+            secilenYon = topYonGercek;
+        } else {
+            String[] digerYonler;
+            switch (topYonGercek) {
+                case "left":
+                    digerYonler = new String[]{"center", "right"};
+                    break;
+                case "center":
+                    digerYonler = new String[]{"left", "right"};
+                    break;
+                default:
+                    digerYonler = new String[]{"left", "center"};
+                    break;
             }
-            else if(hedefYon > 0.25f)
-            {
-                return "sag";
-            }
-            else
-            {
-                return "orta";
-            }
+
+            secilenYon = digerYonler[random.nextInt(2)];
         }
-        else
-        {
-            int yanlisTahminYon = (int)(Math.random() * 3);
-
-            switch(yanlisTahminYon)
-            {
-                case 0:
-                    return "sol";
-                case 1:
-                    return "orta";
-                case 2:
-                    return "sag";
-            }
-        }
-        return "orta";
     }
 
-    public void setMevcutHareket(String mevcutHareket){
-        this.mevcutHareket = mevcutHareket;
+    public void yukseklikAyarla(float topY) {
+        yukseklik = topY < 500 ? "alt" : "üst";
     }
 
-    public String getMevcutHareket(){
-        return mevcutHareket;
+    public String getSecilenYon() {
+        return secilenYon;
+    }
+
+    public String getYukseklik() {
+        return yukseklik;
+    }
+
+    public String getTextureKey() {
+        // "center" yönüne "orta" ismini döndür
+        if (secilenYon.equals("center")) {
+            return "orta";
+        }
+        return secilenYon + "_" + yukseklik;
     }
 }
