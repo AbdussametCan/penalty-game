@@ -11,13 +11,15 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.penaltygame.PenaltyGame;
 import com.penaltygame.Shoot.FirstScreen;
+import com.penaltygame.GameScreen;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class QuarterFinal extends BaseScreen {
+public class QuarterFinal extends BaseScreen implements GameScreen {
 
     private final String[] teams;
     private final String selectedTeam;
@@ -40,30 +42,20 @@ public class QuarterFinal extends BaseScreen {
         Image bracketImage = new Image(bracketTexture);
 
         float scale = 1.5f;
-        float originalWidth = bracketTexture.getWidth();
-        float originalHeight = bracketTexture.getHeight();
-        float scaledWidth = originalWidth * scale;
-        float scaledHeight = originalHeight * scale;
-
-        bracketImage.setSize(scaledWidth, scaledHeight);
-
+        float scaledWidth = bracketTexture.getWidth() * scale;
+        float scaledHeight = bracketTexture.getHeight() * scale;
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
+
+        bracketImage.setSize(scaledWidth, scaledHeight);
         bracketImage.setPosition((screenWidth - scaledWidth) / 2f, (screenHeight - scaledHeight) / 2f);
         stage.addActor(bracketImage);
 
-        // Takımları sabit sırada tut
         List<String> ordered = new ArrayList<>(Arrays.asList(teams));
 
         float[][] positions = {
-            {90, 685},
-            {90, 575},
-            {90, 461},
-            {90, 350},
-            {screenWidth - 260, 685},
-            {screenWidth - 260, 575},
-            {screenWidth - 260, 461},
-            {screenWidth - 260, 350}
+            {90, 685}, {90, 575}, {90, 461}, {90, 350},
+            {screenWidth - 260, 685}, {screenWidth - 260, 575}, {screenWidth - 260, 461}, {screenWidth - 260, 350}
         };
 
         for (int i = 0; i < 8; i++) {
@@ -102,7 +94,7 @@ public class QuarterFinal extends BaseScreen {
                 kalanlar.remove(selectedTeam);
                 Collections.shuffle(kalanlar);
                 String rakipTeam = kalanlar.get(0);
-                game.setScreen(new FirstScreen(game, selectedTeam, rakipTeam));
+                game.setScreen(new FirstScreen(game, selectedTeam, rakipTeam, QuarterFinal.this));
             }
         });
 
@@ -116,14 +108,31 @@ public class QuarterFinal extends BaseScreen {
 
         Texture trophyTexture = game.assetManager.get(trophyPath, Texture.class);
         Image trophyImage = new Image(trophyTexture);
-        float trophyWidth = 350;
-        float trophyHeight = 350;
-        trophyImage.setSize(trophyWidth, trophyHeight);
-        float centerX = (screenWidth - trophyWidth) / 2f;
-        float centerY = 375;
-        trophyImage.setPosition(centerX, centerY);
+        trophyImage.setSize(350, 350);
+        trophyImage.setPosition((screenWidth - 350) / 2f, 375);
         stage.addActor(trophyImage);
 
         addBackButton(() -> game.setScreen(new TeamSelectionScreen(game, teams, imagePath, trophyPath)));
+    }
+
+    @Override
+    public void onGameEnd(boolean playerWon, String opponentTeam) {
+        String winner = playerWon ? selectedTeam : opponentTeam;
+        List<String> kazananlar = new ArrayList<>();
+        kazananlar.add(winner);
+
+        List<String> kalanlar = new ArrayList<>(Arrays.asList(teams));
+        kalanlar.remove(selectedTeam);
+        kalanlar.remove(opponentTeam);
+
+        Collections.shuffle(kalanlar);
+
+        for (int i = 0; i < 6; i += 2) {
+            String teamA = kalanlar.get(i);
+            String teamB = kalanlar.get(i + 1);
+            kazananlar.add(Math.random() < 0.5 ? teamA : teamB);
+        }
+
+        game.setScreen(new SemiFinal(game, Arrays.asList(teams), kazananlar, winner, imagePath, trophyPath));
     }
 }

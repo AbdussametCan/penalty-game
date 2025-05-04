@@ -1,7 +1,8 @@
+// Step 1: GameScreen interface'e gerekli metodu ekliyoruz
 package com.penaltygame;
 
 import com.badlogic.gdx.Screen;
 
 public interface GameScreen extends Screen {
-    // Gerekirse özel davranışlar buraya tanımlanabilir
+    void onGameEnd(boolean playerWon, String opponentTeam);
 }

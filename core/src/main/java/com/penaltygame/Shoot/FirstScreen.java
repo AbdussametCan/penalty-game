@@ -1,6 +1,6 @@
 package com.penaltygame.Shoot;
 
-
+import com.penaltygame.GameScreen;
 import com.penaltygame.bot.OyuncuBot;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
@@ -42,13 +42,21 @@ public class FirstScreen implements Screen {
     final float oyuncuKaleciMinX = 700;
     final float oyuncuKaleciMaxX = 1120;
 
-    public FirstScreen(final PenaltyGame game, String takim1, String takim2) {
+    private GameScreen returnScreen;
+    private String playerTeam;
+    private String opponentTeam;
+
+    public FirstScreen(final PenaltyGame game, String playerTeam, String opponentTeam, GameScreen returnScreen) {
         this.game = game;
+        this.playerTeam = playerTeam;
+        this.opponentTeam = opponentTeam;
+        this.returnScreen = returnScreen;
+
         backgroundTexture = new Texture("field_background.png");
         ballTexture = new Texture("Shoot/ball.png");
         kale = new Kale(500, 430, 920, 270);
         kaleci = new Kaleci(game.assetManager);
-        skorBoard = new SkorBoard(takim1, takim2);
+        skorBoard = new SkorBoard(playerTeam, opponentTeam);
         kaleciPozisyon = new Vector2(910, 430);
         shoot = new Shoot();
 
@@ -87,7 +95,6 @@ public class FirstScreen implements Screen {
         if (oyuncuSirasi) atisSayisiOyuncu++;
         else atisSayisiBot++;
 
-        // Normal atışlar tamamlandıysa ve skor eşitse, seri penaltılara geç
         if (!seriPenaltilar && atisSayisiOyuncu >= MAX_ATIS && atisSayisiBot >= MAX_ATIS) {
             if (skorBoard.getSkorSaldiran() == skorBoard.getSkorSavunan()) {
                 seriPenaltilar = true;
@@ -99,7 +106,6 @@ public class FirstScreen implements Screen {
             }
         }
 
-        // Seri penaltılarda biri öne geçerse oyun biter
         if (seriPenaltilar) {
             if (Math.abs(skorBoard.getSkorSaldiran() - skorBoard.getSkorSavunan()) >= 1
                 && atisSayisiOyuncu > MAX_ATIS && atisSayisiOyuncu == atisSayisiBot) {
@@ -120,12 +126,6 @@ public class FirstScreen implements Screen {
         }
     }
 
-    // render(...) metodu aynı kalır
-    // drawIndicators(), dispose(), show(), resize() gibi geri kalanlar da aynı kalır
-
-
-
-
     @Override
     public void render(float delta) {
         shoot.updateBars(delta);
@@ -135,8 +135,6 @@ public class FirstScreen implements Screen {
             tamamlaSira();
         }
 
-        // Eğer sıra botta ve şut atmıyorsa VE oyuncu pozisyon seçtiyse -> bot şut atacak
-        // Bot şut çekmeden önce 2 saniye beklet
         if (!oyuncuSirasi && !shoot.isShooting() && !oyunBitti && kaleciPozisyonKilitli) {
             if (botSutTimer > 0) {
                 botSutTimer -= delta;
@@ -147,7 +145,7 @@ public class FirstScreen implements Screen {
                 float height = bot.yukseklik;
 
                 shoot.baslaBotSutu(angle, power, height);
-                botSutTimer = -1f; // bir daha tetiklenmesin
+                botSutTimer = -1f;
             }
         }
 
@@ -161,7 +159,6 @@ public class FirstScreen implements Screen {
             shoot.updateBall(delta);
 
             if (oyuncuSirasi) {
-                // Oyuncu şut atıyor → bot kaleci yön seçmişti
                 if (shoot.isSaved(kaleci.getSecilenYon())) {
                     kurtardi = true;
                     mesajTimer = 2f;
@@ -176,19 +173,14 @@ public class FirstScreen implements Screen {
                     tamamlaSira();
                 }
             } else {
-                // Bot şut atıyor → kullanıcı kaleci konumu belirlemişti
                 float topX = shoot.getBallPosition().x;
 
-                if (kaleciPozisyonKilitli &&
-                    topX > oyuncuKaleciX &&
-                    topX < oyuncuKaleciX + 200f) {
-                    // Kurtardı
+                if (kaleciPozisyonKilitli && topX > oyuncuKaleciX && topX < oyuncuKaleciX + 200f) {
                     kurtardi = true;
                     skorBoard.kurtardi();
                     mesajTimer = 2f;
                     resetShotState();
                 } else if (shoot.isGoal(kale)) {
-                    // Gol oldu
                     golOldu = true;
                     skorBoard.golAtti();
                     mesajTimer = 2f;
@@ -200,7 +192,6 @@ public class FirstScreen implements Screen {
             }
         }
 
-
         game.batch.begin();
         game.batch.draw(backgroundTexture, 0, 0);
         Vector2 pos = shoot.getBallPosition();
@@ -208,26 +199,21 @@ public class FirstScreen implements Screen {
 
         float kaleciWidth = 200f;
         float kaleciHeight = 240f;
-        float kaleciX = oyuncuSirasi
-            ? kale.getAlan().x + (kale.getAlan().width - kaleciWidth) / 2f  // bot kaleci
-            : oyuncuKaleciX; // kullanıcı kaleci
-
+        float kaleciX = oyuncuSirasi ? kale.getAlan().x + (kale.getAlan().width - kaleciWidth) / 2f : oyuncuKaleciX;
         float kaleciY = kale.getAlan().y - 50;
-
         game.batch.draw(kaleci.getPozisyonTexture(), kaleciX, kaleciY, kaleciWidth, kaleciHeight);
 
         font.getData().setScale(4f);
         if (golOldu) font.draw(game.batch, "GOOOOL!", 700, 600);
-
-
-        if (botSutTimer > 0 && !oyuncuSirasi) {
-            float yaziX = kale.getAlan().x + kale.getAlan().width / 2f - 90f;
-            float yaziY = kale.getAlan().y + kale.getAlan().height + 40f;
-            font.draw(game.batch, "RAKIP SUT ÇEKIYOR", yaziX, yaziY);
-        }
-
         else if (kurtardi) font.draw(game.batch, "KURTARDI!", 680, 600);
-        else if (oyunBitti) font.draw(game.batch, kazananTakim + " KAZANDI!", 500, 650);
+        else if (oyunBitti) {
+            font.draw(game.batch, kazananTakim + " KAZANDI!", 500, 650);
+            if (returnScreen != null) {
+                boolean playerWon = kazananTakim.equals(playerTeam);
+                returnScreen.onGameEnd(playerWon, opponentTeam);
+                returnScreen = null;
+            }
+        }
 
         font.getData().setScale(1.5f);
         font.setColor(Color.WHITE);
@@ -265,7 +251,6 @@ public class FirstScreen implements Screen {
 
         shapeRenderer.end();
     }
-
 
     @Override public void dispose() {
         ballTexture.dispose();

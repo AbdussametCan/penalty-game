@@ -26,6 +26,11 @@ public class TeamSelectionScreen extends BaseScreen {
         this.trophyPath = trophyPath;
 
     }
+    @Override
+    public void onGameEnd(boolean playerWon, String opponentTeam) {
+        // Bu ekran için gerekli değilse boş bırakılabilir
+    }
+
 
     @Override
     protected void addContent() {

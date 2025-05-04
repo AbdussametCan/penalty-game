@@ -16,6 +16,11 @@ public class LeagueSelectionScreen extends BaseScreen {
     public LeagueSelectionScreen(PenaltyGame game) {
         super(game);
     }
+    @Override
+    public void onGameEnd(boolean playerWon, String opponentTeam) {
+        // Bu ekran için gerekli değilse boş bırakılabilir
+    }
+
 
     @Override
     protected void addContent() {

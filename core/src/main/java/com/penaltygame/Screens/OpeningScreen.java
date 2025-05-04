@@ -15,6 +15,11 @@ public class OpeningScreen extends com.penaltygame.Screens.BaseScreen {
     public OpeningScreen(PenaltyGame game) {
         super(game);
     }
+    @Override
+    public void onGameEnd(boolean playerWon, String opponentTeam) {
+        // Bu ekran için gerekli değilse boş bırakılabilir
+    }
+
 
     @Override
     protected void addContent() {
