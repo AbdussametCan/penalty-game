@@ -13,22 +13,20 @@ import com.penaltygame.PenaltyGame;
 import com.penaltygame.Shoot.FirstScreen;
 import com.penaltygame.GameScreen;
 
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
 
 public class QuarterFinal extends BaseScreen implements GameScreen {
 
-    private final String[] teams;
+    private final List<String> shuffledTeams;
     private final String selectedTeam;
     private final String imagePath;
     private final String trophyPath;
 
     public QuarterFinal(PenaltyGame game, String[] teams, String selectedTeam, String imagePath, String trophyPath) {
         super(game);
-        this.teams = teams;
+        this.shuffledTeams = new ArrayList<>(Arrays.asList(teams));
+        Collections.shuffle(this.shuffledTeams); // ✔ TAKIMLAR RASTGELE KARISTIRILDI
         this.selectedTeam = selectedTeam;
         this.imagePath = imagePath;
         this.trophyPath = trophyPath;
@@ -37,29 +35,23 @@ public class QuarterFinal extends BaseScreen implements GameScreen {
     @Override
     protected void addContent() {
         Skin skin = game.assetManager.get("uiskin.json", Skin.class);
-
-        Texture bracketTexture = new Texture(Gdx.files.internal("bracket.png"));
-        Image bracketImage = new Image(bracketTexture);
-
-        float scale = 1.5f;
-        float scaledWidth = bracketTexture.getWidth() * scale;
-        float scaledHeight = bracketTexture.getHeight() * scale;
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
 
-        bracketImage.setSize(scaledWidth, scaledHeight);
-        bracketImage.setPosition((screenWidth - scaledWidth) / 2f, (screenHeight - scaledHeight) / 2f);
+        Texture bracketTexture = new Texture(Gdx.files.internal("bracket.png"));
+        Image bracketImage = new Image(bracketTexture);
+        float scale = 1.5f;
+        bracketImage.setSize(bracketTexture.getWidth() * scale, bracketTexture.getHeight() * scale);
+        bracketImage.setPosition((screenWidth - bracketImage.getWidth()) / 2f, (screenHeight - bracketImage.getHeight()) / 2f);
         stage.addActor(bracketImage);
-
-        List<String> ordered = new ArrayList<>(Arrays.asList(teams));
 
         float[][] positions = {
             {90, 685}, {90, 575}, {90, 461}, {90, 350},
-            {screenWidth - 260, 685}, {screenWidth - 260, 575}, {screenWidth - 260, 461}, {screenWidth - 260, 350}
+            {screenWidth - 255, 685}, {screenWidth - 255, 575}, {screenWidth - 255, 461}, {screenWidth - 255, 350}
         };
 
         for (int i = 0; i < 8; i++) {
-            String team = ordered.get(i);
+            String team = shuffledTeams.get(i);
 
             TextButton teamButton;
             if (team.equals(selectedTeam)) {
@@ -76,63 +68,59 @@ public class QuarterFinal extends BaseScreen implements GameScreen {
             teamButton.setPosition(positions[i][0], positions[i][1]);
             teamButton.getLabel().setFontScale(1f);
             teamButton.getLabel().setAlignment(Align.center);
-
             stage.addActor(teamButton);
         }
 
-        Texture playTexture = game.assetManager.get("InterfacePng/play.png", Texture.class);
-        TextureRegionDrawable playDrawable = new TextureRegionDrawable(new TextureRegion(playTexture));
-
+        TextureRegionDrawable playDrawable = new TextureRegionDrawable(new TextureRegion(
+            game.assetManager.get("InterfacePng/play.png", Texture.class)));
         ImageButton playButton = new ImageButton(playDrawable);
         playButton.setSize(300, 150);
         playButton.setPosition(screenWidth - 300, 20);
-
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                List<String> kalanlar = new ArrayList<>(Arrays.asList(teams));
-                kalanlar.remove(selectedTeam);
-                Collections.shuffle(kalanlar);
-                String rakipTeam = kalanlar.get(0);
-                game.setScreen(new FirstScreen(game, selectedTeam, rakipTeam, QuarterFinal.this));
+                for (int i = 0; i < 8; i += 2) {
+                    if (shuffledTeams.get(i).equals(selectedTeam) || shuffledTeams.get(i + 1).equals(selectedTeam)) {
+                        String rakip = shuffledTeams.get(i).equals(selectedTeam) ? shuffledTeams.get(i + 1) : shuffledTeams.get(i);
+                        game.setScreen(new FirstScreen(game, selectedTeam, rakip, QuarterFinal.this));
+                        break;
+                    }
+                }
             }
         });
-
         stage.addActor(playButton);
 
-        Texture roadTexture = game.assetManager.get("InterfacePng/roadfinal.png", Texture.class);
-        Image roadImage = new Image(roadTexture);
+        Image roadImage = new Image(game.assetManager.get("InterfacePng/roadfinal.png", Texture.class));
         roadImage.setSize(1000, 200);
         roadImage.setPosition((screenWidth - roadImage.getWidth()) / 2f, screenHeight - roadImage.getHeight() - 75);
         stage.addActor(roadImage);
 
-        Texture trophyTexture = game.assetManager.get(trophyPath, Texture.class);
-        Image trophyImage = new Image(trophyTexture);
+        Image trophyImage = new Image(game.assetManager.get(trophyPath, Texture.class));
         trophyImage.setSize(350, 350);
         trophyImage.setPosition((screenWidth - 350) / 2f, 375);
         stage.addActor(trophyImage);
 
-        addBackButton(() -> game.setScreen(new TeamSelectionScreen(game, teams, imagePath, trophyPath)));
+        addBackButton(() -> {
+            game.setScreen(new TeamSelectionScreen(game, shuffledTeams.toArray(new String[0]), imagePath, trophyPath));
+        });
     }
 
     @Override
     public void onGameEnd(boolean playerWon, String opponentTeam) {
         String winner = playerWon ? selectedTeam : opponentTeam;
         List<String> kazananlar = new ArrayList<>();
-        kazananlar.add(winner);
 
-        List<String> kalanlar = new ArrayList<>(Arrays.asList(teams));
-        kalanlar.remove(selectedTeam);
-        kalanlar.remove(opponentTeam);
+        for (int i = 0; i < 8; i += 2) {
+            String teamA = shuffledTeams.get(i);
+            String teamB = shuffledTeams.get(i + 1);
 
-        Collections.shuffle(kalanlar);
-
-        for (int i = 0; i < 6; i += 2) {
-            String teamA = kalanlar.get(i);
-            String teamB = kalanlar.get(i + 1);
-            kazananlar.add(Math.random() < 0.5 ? teamA : teamB);
+            if (teamA.equals(selectedTeam) || teamB.equals(selectedTeam)) {
+                kazananlar.add(winner);
+            } else {
+                kazananlar.add(Math.random() < 0.5 ? teamA : teamB);
+            }
         }
 
-        game.setScreen(new SemiFinal(game, Arrays.asList(teams), kazananlar, winner, imagePath, trophyPath));
+        game.setScreen(new SemiFinal(game, shuffledTeams, kazananlar, winner, imagePath, trophyPath));
     }
 }
