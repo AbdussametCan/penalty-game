@@ -24,9 +24,11 @@ public class FinalScreen extends BaseScreen implements GameScreen {
     private final String imagePath;
     private final String trophyPath;
     private final List<String> quarterFinalTeams;
+    private final String leagueName;
+
     private String finalWinner = null;
 
-    public FinalScreen(PenaltyGame game, List<String> quarterFinalTeams, List<String> semiFinalWinners, String playerTeam, String opponentTeam, String imagePath, String trophyPath) {
+    public FinalScreen(PenaltyGame game, List<String> quarterFinalTeams, List<String> semiFinalWinners, String playerTeam, String opponentTeam, String imagePath, String trophyPath, String leagueName) {
         super(game);
         this.quarterFinalTeams = quarterFinalTeams;
         this.semiFinalWinners = semiFinalWinners;
@@ -34,6 +36,8 @@ public class FinalScreen extends BaseScreen implements GameScreen {
         this.opponentTeam = opponentTeam;
         this.imagePath = imagePath;
         this.trophyPath = trophyPath;
+        this.leagueName = leagueName;
+
     }
 
 
@@ -79,7 +83,7 @@ public class FinalScreen extends BaseScreen implements GameScreen {
 
         // Finalistleri ekle (Kazananlar)
         float[][] finalPositions = {
-            {950, 517}, {screenWidth - 950, 517}
+            {665, 517}, {screenWidth - 850, 517}
         };
 
         List<String> finalistler = new ArrayList<>();
@@ -114,7 +118,7 @@ public class FinalScreen extends BaseScreen implements GameScreen {
         trophyImage.setPosition((screenWidth - 350) / 2f, 375);
         stage.addActor(trophyImage);
 
-        addBackButton(() -> game.setScreen(new TeamSelectionScreen(game, quarterFinalTeams.toArray(new String[0]), imagePath, trophyPath)));
+        addBackButton(() -> game.setScreen(new TeamSelectionScreen(game, quarterFinalTeams.toArray(new String[0]), imagePath, trophyPath, leagueName)));
     }
 
 
@@ -139,16 +143,6 @@ public class FinalScreen extends BaseScreen implements GameScreen {
     // Finalde kazananı belirleyip gösterme
     @Override
     public void onGameEnd(boolean playerWon, String opponentTeam) {
-        finalWinner = playerWon ? playerTeam : opponentTeam;
-
-        Skin skin = game.assetManager.get("uiskin.json", Skin.class);
-
-        Label winnerLabel = new Label(finalWinner + " KAZANDI!", skin);
-        winnerLabel.setFontScale(2f);
-        winnerLabel.setColor(Color.GOLD);
-        winnerLabel.setAlignment(Align.center);
-        winnerLabel.setPosition((Gdx.graphics.getWidth() - 400) / 2f, 300);
-        winnerLabel.setSize(400, 60);
-        stage.addActor(winnerLabel);
+        game.setScreen(new ResultScreen(game, playerWon, leagueName));
     }
 }

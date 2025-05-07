@@ -1,6 +1,7 @@
 package com.penaltygame.Shoot;
 
 import com.penaltygame.GameScreen;
+import com.penaltygame.Screens.ResultScreen;
 import com.penaltygame.bot.OyuncuBot;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
@@ -220,12 +221,20 @@ public class FirstScreen implements Screen {
         else if (kurtardi) font.draw(game.batch, "KURTARDI!", 680, 600);
         else if (oyunBitti) {
             font.draw(game.batch, kazananTakim + " KAZANDI!", 500, 650);
+
             if (returnScreen != null) {
                 boolean playerWon = kazananTakim.equals(playerTeam);
-                returnScreen.onGameEnd(playerWon, opponentTeam);
+
+                if (playerWon) {
+                    returnScreen.onGameEnd(true, opponentTeam); // normal ilerle
+                } else {
+                    game.setScreen(new ResultScreen(game, false, game.getSelectedLeague())); // kaybedince ResultScreen'e at
+                }
+
                 returnScreen = null;
             }
         }
+
 
         font.getData().setScale(1.5f);
         font.setColor(Color.WHITE);

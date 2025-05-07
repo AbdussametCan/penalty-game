@@ -24,14 +24,17 @@ public class SemiFinal extends BaseScreen implements GameScreen {
     private final String playerTeam;
     private final String imagePath;
     private final String trophyPath;
+    private final String leagueName;
 
-    public SemiFinal(PenaltyGame game, List<String> tumTakimlar, List<String> kazananlar, String playerTeam, String imagePath, String trophyPath) {
+
+    public SemiFinal(PenaltyGame game, List<String> tumTakimlar, List<String> kazananlar, String playerTeam, String imagePath, String trophyPath, String leagueName) {
         super(game);
         this.tumTakimlar = tumTakimlar;
         this.kazananlar = kazananlar;
         this.playerTeam = playerTeam;
         this.imagePath = imagePath;
         this.trophyPath = trophyPath;
+        this.leagueName = leagueName;
     }
 
     @Override
@@ -93,7 +96,7 @@ public class SemiFinal extends BaseScreen implements GameScreen {
         trophyImage.setPosition((screenWidth - 350) / 2f, 375);
         stage.addActor(trophyImage);
 
-        addBackButton(() -> game.setScreen(new TeamSelectionScreen(game, tumTakimlar.toArray(new String[0]), imagePath, trophyPath)));
+        addBackButton(() -> game.setScreen(new TeamSelectionScreen(game, tumTakimlar.toArray(new String[0]), imagePath, trophyPath,leagueName)));
     }
 
     private TextButton createTeamButton(String team, Skin skin) {
@@ -131,7 +134,8 @@ public class SemiFinal extends BaseScreen implements GameScreen {
             finalTeams.add(kalanKazananlar.get(0));
         }
 
-        game.setScreen(new FinalScreen(game, tumTakimlar, kazananlar, winner, finalTeams.get(1), imagePath, trophyPath));
+
+        game.setScreen(new FinalScreen(game, tumTakimlar, kazananlar, winner, finalTeams.get(1), imagePath, trophyPath, leagueName));
     }
 
 }

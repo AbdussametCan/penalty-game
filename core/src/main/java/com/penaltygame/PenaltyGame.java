@@ -16,6 +16,7 @@ public class PenaltyGame extends Game {
 
     public SpriteBatch batch;
     public AssetManager assetManager;
+    private String selectedLeague;
 
     // Müzikler
     public Music fifaSong;
@@ -25,6 +26,14 @@ public class PenaltyGame extends Game {
 
     private int currentSongIndex = 0;
     private Music[] musicQueue;
+
+    public void setSelectedLeague(String selectedLeague) {
+        this.selectedLeague = selectedLeague;
+    }
+
+    public String getSelectedLeague() {
+        return selectedLeague;
+    }
 
     @Override
     public void create() {

@@ -18,12 +18,15 @@ public class TeamSelectionScreen extends BaseScreen {
     private final String[] teams;
     private final String imagePath;
     private final String trophyPath;
+    private final String leagueName;
 
-    public TeamSelectionScreen(PenaltyGame game, String[] teams, String imagePath, String trophyPath) {
+    public TeamSelectionScreen(PenaltyGame game, String[] teams, String imagePath, String trophyPath, String leagueName) {
         super(game);
         this.teams = teams;
         this.imagePath = imagePath;
         this.trophyPath = trophyPath;
+        this.leagueName = leagueName;
+
 
     }
     @Override
@@ -64,7 +67,7 @@ public class TeamSelectionScreen extends BaseScreen {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     System.out.println("Takım seçildi: " + team);
-                    game.setScreen(new QuarterFinal(game, teams, team, imagePath, trophyPath)); // ileride yönlendir
+                    game.setScreen(new QuarterFinal(game, teams, team, imagePath, trophyPath,leagueName)); // ileride yönlendir
                 }
             });
 

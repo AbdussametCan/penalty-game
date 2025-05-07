@@ -22,14 +22,16 @@ public class QuarterFinal extends BaseScreen implements GameScreen {
     private final String selectedTeam;
     private final String imagePath;
     private final String trophyPath;
+    private  final String leagueName;
 
-    public QuarterFinal(PenaltyGame game, String[] teams, String selectedTeam, String imagePath, String trophyPath) {
+    public QuarterFinal(PenaltyGame game, String[] teams, String selectedTeam, String imagePath, String trophyPath,String leagueName) {
         super(game);
         this.shuffledTeams = new ArrayList<>(Arrays.asList(teams));
         Collections.shuffle(this.shuffledTeams); // ✔ TAKIMLAR RASTGELE KARISTIRILDI
         this.selectedTeam = selectedTeam;
         this.imagePath = imagePath;
         this.trophyPath = trophyPath;
+        this.leagueName = leagueName;
     }
 
     @Override
@@ -101,7 +103,7 @@ public class QuarterFinal extends BaseScreen implements GameScreen {
         stage.addActor(trophyImage);
 
         addBackButton(() -> {
-            game.setScreen(new TeamSelectionScreen(game, shuffledTeams.toArray(new String[0]), imagePath, trophyPath));
+            game.setScreen(new TeamSelectionScreen(game, shuffledTeams.toArray(new String[0]), imagePath, trophyPath,leagueName));
         });
     }
 
@@ -121,6 +123,6 @@ public class QuarterFinal extends BaseScreen implements GameScreen {
             }
         }
 
-        game.setScreen(new SemiFinal(game, shuffledTeams, kazananlar, winner, imagePath, trophyPath));
+        game.setScreen(new SemiFinal(game, shuffledTeams, kazananlar, winner, imagePath, trophyPath,leagueName));
     }
 }
