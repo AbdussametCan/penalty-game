@@ -2,6 +2,7 @@ package com.penaltygame.Shoot;
 
 import com.penaltygame.GameScreen;
 import com.penaltygame.Screens.ResultScreen;
+import com.penaltygame.Screens.BaseScreen;
 import com.penaltygame.bot.OyuncuBot;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
@@ -14,8 +15,7 @@ import com.penaltygame.Oyun.Kaleci;
 import com.penaltygame.Oyun.SkorBoard;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-public class FirstScreen implements Screen {
-    final PenaltyGame game;
+public class FirstScreen extends BaseScreen {
     Texture ballTexture, backgroundTexture;
     Vector2 kaleciPozisyon;
     Kale kale;
@@ -25,7 +25,7 @@ public class FirstScreen implements Screen {
     OyuncuBot bot = new OyuncuBot();
 
     Texture arrowTexture;
-    TextureRegion arrowRegion; // Arrow için TextureRegion
+    TextureRegion arrowRegion;
 
     boolean kaleciPozisyonKilitli = false;
     BitmapFont font = new BitmapFont();
@@ -52,12 +52,14 @@ public class FirstScreen implements Screen {
     private String opponentTeam;
 
     public FirstScreen(final PenaltyGame game, String playerTeam, String opponentTeam, GameScreen returnScreen) {
-        this.game = game;
-        this.playerTeam = playerTeam;  // Oyuncunun seçtiği takım, burada bir kez set edilecek ve sonrasında değişmeyecek
-        this.opponentTeam = opponentTeam;  // Rakip takım da aynı şekilde set edilecek ve değişmeyecek
-        this.returnScreen = returnScreen;  // Geri dönüş yapılacak ekran
+        super(game);
+        this.playerTeam = playerTeam;
+        this.opponentTeam = opponentTeam;
+        this.returnScreen = returnScreen;
+    }
 
-        // Diğer başlangıç ayarları devam eder
+    @Override
+    protected void addContent() {
         backgroundTexture = new Texture("field_background.png");
         ballTexture = new Texture("Shoot/ball.png");
         kale = new Kale(500, 430, 920, 270);
@@ -66,7 +68,6 @@ public class FirstScreen implements Screen {
         kaleciPozisyon = new Vector2(910, 430);
         shoot = new Shoot();
 
-        // Yükleme işlemi sırasında arrowTexture'ı ve arrowRegion'u bağla
         arrowTexture = game.assetManager.get("InterfacePng/arrow.png", Texture.class);
         arrowRegion = new TextureRegion(arrowTexture);
 
@@ -92,14 +93,11 @@ public class FirstScreen implements Screen {
         });
     }
 
-
     private void resetShotState() {
         clickStage = 0;
         kaleciKararVerdi = false;
         shoot.reset();
-
     }
-
 
     private void tamamlaSira() {
         kaleciKararVerdi = false;
@@ -226,15 +224,14 @@ public class FirstScreen implements Screen {
                 boolean playerWon = kazananTakim.equals(playerTeam);
 
                 if (playerWon) {
-                    returnScreen.onGameEnd(true, opponentTeam); // normal ilerle
+                    returnScreen.onGameEnd(true, opponentTeam);
                 } else {
-                    game.setScreen(new ResultScreen(game, false, game.getSelectedLeague())); // kaybedince ResultScreen'e at
+                    game.setScreen(new ResultScreen(game, false, game.getSelectedLeague()));
                 }
 
                 returnScreen = null;
             }
         }
-
 
         font.getData().setScale(1.5f);
         font.setColor(Color.WHITE);
@@ -253,25 +250,24 @@ public class FirstScreen implements Screen {
         if (shoot.isShooting() || oyunBitti || !oyuncuSirasi) return;
 
         if (!shoot.isDirectionLocked()) {
-            float angle = (shoot.getDirectionTimer() - 0.5f) * 2f * 90f; // -90° ile +90°
-            float arrowX = shoot.getBallPosition().x;        // Topun ortası
-            float arrowY = shoot.getBallPosition().y + 16f; // Çünkü top 32x32 çiziliyor, yarısı 16
-
+            float angle = (shoot.getDirectionTimer() - 0.5f) * 2f * 90f;
+            float arrowX = shoot.getBallPosition().x;
+            float arrowY = shoot.getBallPosition().y + 16f;
 
             float width = 60f;
             float height = 100f;
 
             float originX = width / 2f;
-            float originY = 0f;  // sap kısmı sabit
+            float originY = 0f;
 
             game.batch.begin();
             game.batch.draw(
                 arrowRegion,
-                arrowX - originX, arrowY,   // çizim konumu (merkezi ortala)
-                originX, originY,           // dönme merkezi (alt ortası)
-                width, height,              // sabit boyut
+                arrowX - originX, arrowY,
+                originX, originY,
+                width, height,
                 1f, 1f,
-                angle                       // dönüş açısı
+                angle
             );
             game.batch.end();
         }
@@ -282,20 +278,7 @@ public class FirstScreen implements Screen {
             shapeRenderer.rect(50, 50, 20, shoot.getPowerTimer() * 150);
             shapeRenderer.end();
         }
-
-        if (!shoot.isPowerLocked() && shoot.isDirectionLocked()) {
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            shapeRenderer.setColor(Color.BLUE);
-            shapeRenderer.rect(50, 50, 20, shoot.getPowerTimer() * 150);
-            shapeRenderer.end();
-        }
     }
-
-
-
-
-
-
 
     @Override public void dispose() {
         ballTexture.dispose();
@@ -303,8 +286,16 @@ public class FirstScreen implements Screen {
         shapeRenderer.dispose();
     }
 
-    @Override public void show() {}
-    @Override public void resize(int width, int height) {}
+    @Override public void resize(int width, int height) {
+        super.resize(width, height);
+    }
+
+    @Override
+    public void onGameEnd(boolean playerWon, String opponentTeam) {
+        // Bu ekran oyunu bitiren ekran değil, bu yüzden genelde bir şey yapmana gerek yok
+        // Ancak yine de boş bırakmak yerine gerekirse log yazabilirsin
+    }
+
     @Override public void pause() {}
     @Override public void resume() {}
     @Override public void hide() {}
