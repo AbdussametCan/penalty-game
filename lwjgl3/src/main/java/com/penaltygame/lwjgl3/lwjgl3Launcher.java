@@ -11,3 +11,4 @@ public class lwjgl3Launcher {
         new Lwjgl3Application(new PenaltyGame(), config);
     }
 }
+

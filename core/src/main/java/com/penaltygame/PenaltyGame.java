@@ -97,9 +97,19 @@ public class PenaltyGame extends Game {
             }
         }
 
+        //Yön Çubuğu
+        assetManager.load("InterfacePng/arrow.png", Texture.class);
+
+        assetManager.finishLoading();
         // İlk ekranı FirstScreen olarak ayarla
         setScreen(new OpeningScreen(this));
+
+
+
+
     }
+
+
 
     private void playNextSong() {
         if (currentSongIndex < musicQueue.length) {
