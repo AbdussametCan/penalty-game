@@ -12,15 +12,11 @@ public class Shoot {
     private boolean isShooting = false;
     private float directionValue = 0f, powerValue = 0f;
     private String topYonu = "";
-    private boolean shooting = false;
-
 
     public Shoot() {
         ballPosition = new Vector2(960, 150);
         velocity = new Vector2();
     }
-
-
 
     public void updateBars(float delta) {
         if (!directionLocked) {
@@ -50,26 +46,13 @@ public class Shoot {
         directionValue = directionTimer;
         directionLocked = true;
     }
-    public void baslaBotSutu(float angle, float power, float height) {
-        this.directionLocked = true;
-        this.powerLocked = true;
-        this.directionTimer = angle / 180f;
-        this.powerTimer = power;
-        this.ballPosition.set(960, 150);
-        this.velocity.set(
-            (float) Math.cos(Math.toRadians(angle)) * power * 800,
-            height * power * 900
-        );
-        this.isShooting = true; // <-- BU ÇOK ÖNEMLİ
-    }
-
-
 
     public void lockPower() {
         powerValue = powerTimer;
         powerLocked = true;
-        float angle = directionValue * 180f;
-        float speed = 300f + powerValue * 400f;
+
+        float angle = 90f + (directionValue - 0.5f) * 2f * 90f; // 180°'lik dönüş
+        float speed = 300f + powerValue * 700f;
         float rad = (float) Math.toRadians(angle);
         Vector2 dir = new Vector2((float) Math.cos(rad), (float) Math.sin(rad)).nor();
         velocity.set(dir.scl(speed));
@@ -78,7 +61,20 @@ public class Shoot {
         topYonu = angle < 60 ? "right" : angle > 120 ? "left" : "center";
     }
 
-    public  void updateBall(float delta) {
+    public void baslaBotSutu(float angle, float power, float height) {
+        this.directionLocked = true;
+        this.powerLocked = true;
+        this.directionTimer = (angle - 90f) / 90f / 2f + 0.5f; // açıyı directionTimer'a çevir
+        this.powerTimer = power;
+        this.ballPosition.set(960, 150);
+        this.velocity.set(
+            (float) Math.cos(Math.toRadians(angle)) * power * 800,
+            height * power * 900
+        );
+        this.isShooting = true;
+    }
+
+    public void updateBall(float delta) {
         if (isShooting) {
             ballPosition.mulAdd(velocity, delta);
         }
@@ -102,7 +98,7 @@ public class Shoot {
     }
 
     public boolean isSaved() {
-        return false; // dışarıdan yön verilmeden kontrol edilemez
+        return false;
     }
 
     public void reset() {

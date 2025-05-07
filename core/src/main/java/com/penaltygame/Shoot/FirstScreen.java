@@ -11,6 +11,7 @@ import com.penaltygame.PenaltyGame;
 import com.penaltygame.Oyun.Kale;
 import com.penaltygame.Oyun.Kaleci;
 import com.penaltygame.Oyun.SkorBoard;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class FirstScreen implements Screen {
     final PenaltyGame game;
@@ -21,6 +22,9 @@ public class FirstScreen implements Screen {
     SkorBoard skorBoard;
     Shoot shoot;
     OyuncuBot bot = new OyuncuBot();
+
+    Texture arrowTexture;
+    TextureRegion arrowRegion; // Arrow için TextureRegion
 
     boolean kaleciPozisyonKilitli = false;
     BitmapFont font = new BitmapFont();
@@ -59,6 +63,10 @@ public class FirstScreen implements Screen {
         skorBoard = new SkorBoard(playerTeam, opponentTeam);
         kaleciPozisyon = new Vector2(910, 430);
         shoot = new Shoot();
+
+        // Yükleme işlemi sırasında arrowTexture'ı ve arrowRegion'u bağla
+        arrowTexture = game.assetManager.get("InterfacePng/arrow.png", Texture.class);
+        arrowRegion = new TextureRegion(arrowTexture);
 
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
@@ -231,26 +239,50 @@ public class FirstScreen implements Screen {
     private void drawIndicators() {
         if (shoot.isShooting() || oyunBitti || !oyuncuSirasi) return;
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
         if (!shoot.isDirectionLocked()) {
-            float angle = shoot.getDirectionTimer() * 180f;
-            float rad = (float) Math.toRadians(angle);
-            float length = 100f;
-            float startX = 960, startY = 150;
-            float endX = startX + (float) Math.cos(rad) * length;
-            float endY = startY + (float) Math.sin(rad) * length;
-            shapeRenderer.setColor(Color.YELLOW);
-            shapeRenderer.rectLine(startX, startY, endX, endY, 5f);
+            float angle = (shoot.getDirectionTimer() - 0.5f) * 2f * 90f; // -90° ile +90°
+            float arrowX = shoot.getBallPosition().x;        // Topun ortası
+            float arrowY = shoot.getBallPosition().y + 16f; // Çünkü top 32x32 çiziliyor, yarısı 16
+
+
+            float width = 60f;
+            float height = 100f;
+
+            float originX = width / 2f;
+            float originY = 0f;  // sap kısmı sabit
+
+            game.batch.begin();
+            game.batch.draw(
+                arrowRegion,
+                arrowX - originX, arrowY,   // çizim konumu (merkezi ortala)
+                originX, originY,           // dönme merkezi (alt ortası)
+                width, height,              // sabit boyut
+                1f, 1f,
+                angle                       // dönüş açısı
+            );
+            game.batch.end();
         }
 
         if (!shoot.isPowerLocked() && shoot.isDirectionLocked()) {
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             shapeRenderer.setColor(Color.BLUE);
             shapeRenderer.rect(50, 50, 20, shoot.getPowerTimer() * 150);
+            shapeRenderer.end();
         }
 
-        shapeRenderer.end();
+        if (!shoot.isPowerLocked() && shoot.isDirectionLocked()) {
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            shapeRenderer.setColor(Color.BLUE);
+            shapeRenderer.rect(50, 50, 20, shoot.getPowerTimer() * 150);
+            shapeRenderer.end();
+        }
     }
+
+
+
+
+
+
 
     @Override public void dispose() {
         ballTexture.dispose();
