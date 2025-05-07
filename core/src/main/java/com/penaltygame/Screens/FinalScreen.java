@@ -118,8 +118,6 @@ public class FinalScreen extends BaseScreen implements GameScreen {
         trophyImage.setPosition((screenWidth - 350) / 2f, 375);
         stage.addActor(trophyImage);
 
-        //addBackButton(() -> game.setScreen(new TeamSelectionScreen(game, quarterFinalTeams.toArray(new String[0]), imagePath, trophyPath, leagueName)));
-
         Image roadImage = new Image(game.assetManager.get("InterfacePng/roadfinal.png", Texture.class));
         roadImage.setSize(1000, 200);
         roadImage.setPosition((screenWidth - roadImage.getWidth()) / 2f, screenHeight - roadImage.getHeight() - 75);
