@@ -46,7 +46,6 @@ public class SemiFinal extends BaseScreen implements GameScreen {
         bracketImage.setPosition((screenWidth - bracketImage.getWidth()) / 2f, (screenHeight - bracketImage.getHeight()) / 2f);
         stage.addActor(bracketImage);
 
-        // QuarterFinal takimlari (soldan saga 8 takim)
         float[][] quarterPositions = {
             {90, 685}, {90, 575}, {90, 461}, {90, 350},
             {screenWidth - 255, 685}, {screenWidth - 255, 575}, {screenWidth - 255, 461}, {screenWidth - 255, 350}
@@ -54,16 +53,11 @@ public class SemiFinal extends BaseScreen implements GameScreen {
 
         for (int i = 0; i < tumTakimlar.size(); i++) {
             String team = tumTakimlar.get(i);
-            TextButton button = new TextButton(team, skin);
-            if (team.equals(playerTeam)) button.getLabel().setColor(Color.YELLOW);
-            button.setSize(170, 45);
+            TextButton button = createTeamButton(team, skin);
             button.setPosition(quarterPositions[i][0], quarterPositions[i][1]);
-            button.getLabel().setFontScale(1f);
-            button.getLabel().setAlignment(Align.center);
             stage.addActor(button);
         }
 
-        // SemiFinale kalan takimlar (4 kazanan - 2'li eslesmelerin galibi)
         float[][] semiPositions = {
             {375, 630}, {375, 406},
             {screenWidth - 540, 630}, {screenWidth - 540, 406}
@@ -71,27 +65,11 @@ public class SemiFinal extends BaseScreen implements GameScreen {
 
         for (int i = 0; i < kazananlar.size() && i < semiPositions.length; i++) {
             String kazanan = kazananlar.get(i);
-
-            TextButton btn;
-            if (kazanan.equals(playerTeam)) {
-                TextButton.TextButtonStyle redStyle = new TextButton.TextButtonStyle();
-                redStyle.up = skin.getDrawable("default-round-down");
-                redStyle.font = skin.getFont("default-font");
-                btn = new TextButton(kazanan, redStyle);
-                btn.getLabel().setColor(Color.YELLOW);
-            } else {
-                btn = new TextButton(kazanan, skin);
-            }
-
-            btn.setSize(170, 45);
+            TextButton btn = createTeamButton(kazanan, skin);
             btn.setPosition(semiPositions[i][0], semiPositions[i][1]);
-            btn.getLabel().setFontScale(1f);
-            btn.getLabel().setAlignment(Align.center);
             stage.addActor(btn);
         }
 
-
-        // Play butonu
         Texture playTexture = game.assetManager.get("InterfacePng/play.png", Texture.class);
         ImageButton playButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(playTexture)));
         playButton.setSize(300, 150);
@@ -109,25 +87,51 @@ public class SemiFinal extends BaseScreen implements GameScreen {
         });
         stage.addActor(playButton);
 
-        // Trophy
         Texture trophyTexture = game.assetManager.get(trophyPath, Texture.class);
         Image trophyImage = new Image(trophyTexture);
         trophyImage.setSize(350, 350);
         trophyImage.setPosition((screenWidth - 350) / 2f, 375);
         stage.addActor(trophyImage);
 
-        // Geri donus butonu
         addBackButton(() -> game.setScreen(new TeamSelectionScreen(game, tumTakimlar.toArray(new String[0]), imagePath, trophyPath)));
     }
 
+    private TextButton createTeamButton(String team, Skin skin) {
+        TextButton btn;
+        if (team.equals(playerTeam)) {
+            TextButton.TextButtonStyle redStyle = new TextButton.TextButtonStyle();
+            redStyle.up = skin.getDrawable("default-round-down");
+            redStyle.font = skin.getFont("default-font");
+            btn = new TextButton(team, redStyle);
+            btn.getLabel().setColor(Color.YELLOW);
+        } else {
+            btn = new TextButton(team, skin);
+        }
+        btn.setSize(170, 45);
+        btn.getLabel().setFontScale(1f);
+        btn.getLabel().setAlignment(Align.center);
+        return btn;
+    }
 
     @Override
     public void onGameEnd(boolean playerWon, String opponentTeam) {
-        List<String> finalTakimlar = new ArrayList<>(kazananlar);
-        finalTakimlar.remove(playerWon ? opponentTeam : playerTeam);
-        String ilerleyen = playerWon ? playerTeam : opponentTeam;
-        finalTakimlar.add(ilerleyen);
+        List<String> finalTeams = new ArrayList<>();
 
-        game.setScreen(new FinalScreen(game, tumTakimlar, finalTakimlar, ilerleyen, playerTeam, imagePath, trophyPath));
+        String winner = playerWon ? playerTeam : opponentTeam;
+        finalTeams.add(winner);
+
+        // Oyuncunun eşleştiği ikili
+        List<String> kalanKazananlar = new ArrayList<>(kazananlar);
+        kalanKazananlar.remove(playerTeam);
+        kalanKazananlar.remove(opponentTeam);
+
+        // Diğer eşleşmeden rastgele kazanan seç
+        if (kalanKazananlar.size() == 2) {
+            Collections.shuffle(kalanKazananlar);
+            finalTeams.add(kalanKazananlar.get(0));
+        }
+
+        game.setScreen(new FinalScreen(game, tumTakimlar, kazananlar, winner, finalTeams.get(1), imagePath, trophyPath));
     }
+
 }

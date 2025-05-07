@@ -48,10 +48,11 @@ public class FirstScreen implements Screen {
 
     public FirstScreen(final PenaltyGame game, String playerTeam, String opponentTeam, GameScreen returnScreen) {
         this.game = game;
-        this.playerTeam = playerTeam;
-        this.opponentTeam = opponentTeam;
-        this.returnScreen = returnScreen;
+        this.playerTeam = playerTeam;  // Oyuncunun seçtiği takım, burada bir kez set edilecek ve sonrasında değişmeyecek
+        this.opponentTeam = opponentTeam;  // Rakip takım da aynı şekilde set edilecek ve değişmeyecek
+        this.returnScreen = returnScreen;  // Geri dönüş yapılacak ekran
 
+        // Diğer başlangıç ayarları devam eder
         backgroundTexture = new Texture("field_background.png");
         ballTexture = new Texture("Shoot/ball.png");
         kale = new Kale(500, 430, 920, 270);
@@ -82,11 +83,14 @@ public class FirstScreen implements Screen {
         });
     }
 
+
     private void resetShotState() {
         clickStage = 0;
         kaleciKararVerdi = false;
         shoot.reset();
+
     }
+
 
     private void tamamlaSira() {
         kaleciKararVerdi = false;
