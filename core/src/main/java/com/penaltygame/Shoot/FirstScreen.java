@@ -65,6 +65,7 @@ public class FirstScreen implements Screen {
         this.opponentTeam = opponentTeam;
         this.returnScreen = returnScreen;
 
+        // Asset yüklemeleri
         backgroundTexture = new Texture("field_background.png");
         ballTexture = new Texture("Shoot/ball.png");
         arrowTexture = game.assetManager.get("InterfacePng/arrow.png", Texture.class);
@@ -80,6 +81,7 @@ public class FirstScreen implements Screen {
     @Override
     public void show() {
         buttonStage = new Stage(new ScreenViewport());
+        addUIButtons();
         Gdx.input.setInputProcessor(new InputMultiplexer(buttonStage, new InputAdapter() {
             @Override
             public boolean touchDown(int x, int y, int pointer, int button) {
@@ -101,6 +103,58 @@ public class FirstScreen implements Screen {
             }
         }));
     }
+
+    private void addUIButtons() {
+        float buttonSize = 110f;
+        float padding = 20f;
+
+        // Ses butonu
+        Texture soundOn = game.assetManager.get("InterfacePng/soundOn.png", Texture.class);
+        Texture soundOff = game.assetManager.get("InterfacePng/soundOff.png", Texture.class);
+        final boolean[] soundState = {true};
+
+        ImageButton soundBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(soundOn)));
+        soundBtn.setSize(buttonSize, buttonSize);
+        soundBtn.setPosition(Gdx.graphics.getWidth() - buttonSize - padding, Gdx.graphics.getHeight() - buttonSize - padding);
+        soundBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                soundState[0] = !soundState[0];
+                Music music = game.getCurrentMusic();
+                if (music != null) music.setVolume(soundState[0] ? 1f : 0f);
+                soundBtn.getStyle().imageUp = new TextureRegionDrawable(new TextureRegion(soundState[0] ? soundOn : soundOff));
+            }
+        });
+
+        // Çıkış butonu
+        Texture exitTex = game.assetManager.get("InterfacePng/exit.png", Texture.class);
+        ImageButton exitBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(exitTex)));
+        exitBtn.setSize(buttonSize, buttonSize);
+        exitBtn.setPosition(padding, Gdx.graphics.getHeight() - buttonSize - padding);
+        exitBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.exit();
+            }
+        });
+
+        // Sonraki şarkı butonu
+        Texture nextTex = game.assetManager.get("InterfacePng/next.png", Texture.class);
+        ImageButton nextBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(nextTex)));
+        nextBtn.setSize(buttonSize, buttonSize);
+        nextBtn.setPosition(Gdx.graphics.getWidth() - 2 * (buttonSize + padding), Gdx.graphics.getHeight() - buttonSize - padding);
+        nextBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.skipToNextSong();
+            }
+        });
+
+        buttonStage.addActor(soundBtn);
+        buttonStage.addActor(exitBtn);
+        buttonStage.addActor(nextBtn);
+    }
+
 
     private void resetShotState() {
         clickStage = 0;
@@ -171,7 +225,7 @@ public class FirstScreen implements Screen {
 
             if (oyuncuSirasi) {
                 if (shoot.isSaved(kaleci.getSecilenYon())) {
-                    kurtardi = true; skorBoard.kurtardi(); mesajTimer = 2f; resetShotState();
+                    kurtardi = true; mesajTimer = 2f; resetShotState();
                 } else if (shoot.isGoal(kale)) {
                     golOldu = true; skorBoard.golAtti(); mesajTimer = 2f; resetShotState();
                 } else if (shoot.isShotComplete(kale)) {
@@ -189,79 +243,38 @@ public class FirstScreen implements Screen {
             }
         }
 
-        // EKRANA ÇİZİM
         game.batch.begin();
-
-        // Arka plan
         game.batch.draw(backgroundTexture, 0, 0);
-
-        // Top
         Vector2 pos = shoot.getBallPosition();
         game.batch.draw(ballTexture, pos.x - 16, pos.y - 16, 32, 32);
 
-        // Kaleci
         float kaleciX = oyuncuSirasi ? kale.getAlan().x + (kale.getAlan().width - 200) / 2f : oyuncuKaleciX;
         float kaleciY = kale.getAlan().y - 50;
         game.batch.draw(kaleci.getPozisyonTexture(), kaleciX, kaleciY, 200, 240);
 
-        // Skor yazıları
         font.getData().setScale(4f);
         if (golOldu) font.draw(game.batch, "GOOOOL!", 700, 600);
         else if (kurtardi) font.draw(game.batch, "KURTARDI!", 680, 600);
-        else if (oyunBitti) font.draw(game.batch, kazananTakim + " KAZANDI!", 500, 650);
+        else if (oyunBitti) {
+            font.draw(game.batch, kazananTakim + " KAZANDI!", 500, 650);
+            if (returnScreen != null) {
+                boolean playerWon = kazananTakim.equals(playerTeam);
+                if (playerWon) returnScreen.onGameEnd(true, opponentTeam);
+                else game.setScreen(new ResultScreen(game, false, game.getSelectedLeague()));
+                returnScreen = null;
+            }
+        }
 
-        // Ev Sahibi / Deplasman Etiketleri
-        int baseX = Gdx.graphics.getWidth() - 220;
-        int baseY = 100;
-        font.getData().setScale(1.2f);
-        font.setColor(Color.WHITE);
-        font.draw(game.batch, "Ev Sahibi", baseX - 305, baseY + 10);
-        font.draw(game.batch, "Deplasman", baseX - 320, baseY - 15);
-
-        // Penaltı sırası
         font.getData().setScale(1.5f);
-        font.setColor(Color.YELLOW);
-        int sira = oyuncuSirasi ? skorBoard.getGecmisSaldiran().size() + 1 : skorBoard.getGecmisSavunan().size() + 1;
-        font.draw(game.batch, sira + ". PENALTI", baseX - 190, baseY + 45);
-
+        font.setColor(Color.WHITE);
+        font.draw(game.batch, skorBoard.getTakimSaldiran() + ": " + skorBoard.getSkorSaldiran(), Gdx.graphics.getWidth() - 400, 100);
+        font.draw(game.batch, skorBoard.getTakimSavunan() + ": " + skorBoard.getSkorSavunan(), Gdx.graphics.getWidth() - 400, 70);
         game.batch.end();
 
-        drawScoreCircles();
         drawIndicators();
 
         buttonStage.act(delta);
         buttonStage.draw();
-    }
-
-    private void drawScoreCircles() {
-        int circleRadius = 10;
-        int spacing = 30;
-        int baseX = Gdx.graphics.getWidth() - 220;
-        int baseY = 100;
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        for (int i = 0; i < MAX_ATIS; i++) {
-            // Saldıran (üst sıra)
-            Color color1 = i < skorBoard.getGecmisSaldiran().size()
-                ? (skorBoard.getGecmisSaldiran().get(i) ? Color.GREEN : Color.RED)
-                : Color.LIGHT_GRAY;
-            shapeRenderer.setColor(color1);
-            shapeRenderer.circle(baseX + i * spacing, baseY + 30, circleRadius);
-
-            // Savunan (alt sıra)
-            Color color2 = i < skorBoard.getGecmisSavunan().size()
-                ? (skorBoard.getGecmisSavunan().get(i) ? Color.GREEN : Color.RED)
-                : Color.LIGHT_GRAY;
-            shapeRenderer.setColor(color2);
-            shapeRenderer.circle(baseX + i * spacing, baseY, circleRadius);
-        }
-        shapeRenderer.end();
-
-        // ⚠️ Burası için yeni begin-end bloğu gerekiyor
-        game.batch.begin();
-        font.getData().setScale(1.5f);
-        font.setColor(Color.YELLOW);
-        game.batch.end();
     }
 
     private void drawIndicators() {
