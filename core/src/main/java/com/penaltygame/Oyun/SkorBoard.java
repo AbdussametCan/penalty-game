@@ -1,28 +1,42 @@
 package com.penaltygame.Oyun;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SkorBoard {
+    private final String evSahibiTakim;
+    private final String deplasmanTakim;
+
     private String takimSaldiran;
     private String takimSavunan;
+
     private int skorSaldiran = 0;
     private int skorSavunan = 0;
 
-    public SkorBoard(String takimSaldiran, String takimSavunan) {
-        this.takimSaldiran = takimSaldiran;
-        this.takimSavunan = takimSavunan;
+    private List<Boolean> gecmisSaldiran = new ArrayList<>();
+    private List<Boolean> gecmisSavunan = new ArrayList<>();
+
+    public SkorBoard(String evSahibiTakim, String deplasmanTakim) {
+        this.evSahibiTakim = evSahibiTakim;
+        this.deplasmanTakim = deplasmanTakim;
+
+        this.takimSaldiran = evSahibiTakim;
+        this.takimSavunan = deplasmanTakim;
     }
 
-    // Gol atan taraf skor alır — şu an saldıran
     public void golAtti() {
         skorSaldiran++;
+        gecmisSaldiran.add(true);  // Gol oldu
+        gecmisSavunan.add(false);  // Kurtaramadı
     }
 
-    // Kurtarışta skor değişmez
     public void kurtardi() {
-        // Sadece görsel mesaj için
+        gecmisSaldiran.add(false); // Gol olmadı
+        gecmisSavunan.add(true);   // Kurtardı
     }
 
-    // Skorları ve takımları döndür
     public void takimlariDegistir() {
+        // Saldıran ve savunan rolleri değişir ama ev sahibi ve deplasman değişmez
         String tempTakim = takimSaldiran;
         takimSaldiran = takimSavunan;
         takimSavunan = tempTakim;
@@ -30,11 +44,17 @@ public class SkorBoard {
         int tempSkor = skorSaldiran;
         skorSaldiran = skorSavunan;
         skorSavunan = tempSkor;
+
+        List<Boolean> tempGecmis = gecmisSaldiran;
+        gecmisSaldiran = gecmisSavunan;
+        gecmisSavunan = tempGecmis;
     }
 
     public void reset() {
         skorSaldiran = 0;
         skorSavunan = 0;
+        gecmisSaldiran.clear();
+        gecmisSavunan.clear();
     }
 
     public String getTakimSaldiran() {
@@ -53,11 +73,37 @@ public class SkorBoard {
         return skorSavunan;
     }
 
-    public String getSaldiranTakimAdi() {
-        return takimSaldiran;
+    public List<Boolean> getGecmisSaldiran() {
+        return gecmisSaldiran;
     }
 
-    public String getSavunanTakimAdi() {
-        return takimSavunan;
+    public List<Boolean> getGecmisSavunan() {
+        return gecmisSavunan;
+    }
+
+    public Boolean getSaldiranAtis(int index) {
+        return index < gecmisSaldiran.size() ? gecmisSaldiran.get(index) : null;
+    }
+
+    public Boolean getSavunanAtis(int index) {
+        return index < gecmisSavunan.size() ? gecmisSavunan.get(index) : null;
+    }
+
+    public String getEvSahibiTakim() {
+        return evSahibiTakim;
+    }
+
+    public String getDeplasmanTakim() {
+        return deplasmanTakim;
+    }
+
+    // Yeni: Saldıran takım için sonucu manuel olarak ekle
+    public void ekleSaldiranAtis(boolean golMu) {
+        gecmisSaldiran.add(golMu);
+    }
+
+    // Yeni: Savunan takım için sonucu manuel olarak ekle
+    public void ekleSavunanAtis(boolean kurtardiMi) {
+        gecmisSavunan.add(kurtardiMi);
     }
 }
