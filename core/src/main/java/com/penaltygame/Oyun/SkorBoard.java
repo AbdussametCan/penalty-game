@@ -1,63 +1,54 @@
 package com.penaltygame.Oyun;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SkorBoard {
-    private String takimSaldiran;
-    private String takimSavunan;
-    private int skorSaldiran = 0;
-    private int skorSavunan = 0;
+    private final String takimA;
+    private final String takimB;
 
-    public SkorBoard(String takimSaldiran, String takimSavunan) {
-        this.takimSaldiran = takimSaldiran;
-        this.takimSavunan = takimSavunan;
+    private final List<Boolean> atislarA = new ArrayList<>();
+    private final List<Boolean> atislarB = new ArrayList<>();
+
+    public SkorBoard(String takimA, String takimB) {
+        this.takimA = takimA;
+        this.takimB = takimB;
     }
 
-    // Gol atan taraf skor alır — şu an saldıran
-    public void golAtti() {
-        skorSaldiran++;
+    public void addShot(boolean oyuncuSirada, boolean golOldu) {
+        if (oyuncuSirada) {
+            atislarA.add(golOldu);
+        } else {
+            atislarB.add(golOldu);
+        }
     }
 
-    // Kurtarışta skor değişmez
-    public void kurtardi() {
-        // Sadece görsel mesaj için
+    public List<Boolean> getAtislarA() {
+        return atislarA;
     }
 
-    // Skorları ve takımları döndür
-    public void takimlariDegistir() {
-        String tempTakim = takimSaldiran;
-        takimSaldiran = takimSavunan;
-        takimSavunan = tempTakim;
+    public List<Boolean> getAtislarB() {
+        return atislarB;
+    }
 
-        int tempSkor = skorSaldiran;
-        skorSaldiran = skorSavunan;
-        skorSavunan = tempSkor;
+    public int getSkorA() {
+        return (int) atislarA.stream().filter(b -> b).count();
+    }
+
+    public int getSkorB() {
+        return (int) atislarB.stream().filter(b -> b).count();
+    }
+
+    public String getTakimA() {
+        return takimA;
+    }
+
+    public String getTakimB() {
+        return takimB;
     }
 
     public void reset() {
-        skorSaldiran = 0;
-        skorSavunan = 0;
-    }
-
-    public String getTakimSaldiran() {
-        return takimSaldiran;
-    }
-
-    public String getTakimSavunan() {
-        return takimSavunan;
-    }
-
-    public int getSkorSaldiran() {
-        return skorSaldiran;
-    }
-
-    public int getSkorSavunan() {
-        return skorSavunan;
-    }
-
-    public String getSaldiranTakimAdi() {
-        return takimSaldiran;
-    }
-
-    public String getSavunanTakimAdi() {
-        return takimSavunan;
+        atislarA.clear();
+        atislarB.clear();
     }
 }

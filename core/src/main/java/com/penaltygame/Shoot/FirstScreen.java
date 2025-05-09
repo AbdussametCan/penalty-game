@@ -1,5 +1,6 @@
 package com.penaltygame.Shoot;
 
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Rectangle;
 import com.penaltygame.GameScreen;
 import com.penaltygame.Screens.ResultScreen;
@@ -23,8 +24,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 public class FirstScreen implements Screen {
 
     final PenaltyGame game;
-    Texture ballTexture, backgroundTexture;
-    Texture arrowTexture;
+    Texture ballTexture, backgroundTexture, arrowTexture;
     TextureRegion arrowRegion;
     Vector2 kaleciPozisyon;
     Kale kale;
@@ -66,7 +66,6 @@ public class FirstScreen implements Screen {
         this.opponentTeam = opponentTeam;
         this.returnScreen = returnScreen;
 
-        // Asset yüklemeleri
         backgroundTexture = new Texture("field_background.png");
         ballTexture = new Texture("Shoot/ball.png");
         arrowTexture = game.assetManager.get("InterfacePng/arrow.png", Texture.class);
@@ -109,7 +108,6 @@ public class FirstScreen implements Screen {
         float buttonSize = 110f;
         float padding = 20f;
 
-        // Ses butonu
         Texture soundOn = game.assetManager.get("InterfacePng/soundOn.png", Texture.class);
         Texture soundOff = game.assetManager.get("InterfacePng/soundOff.png", Texture.class);
         final boolean[] soundState = {true};
@@ -127,7 +125,6 @@ public class FirstScreen implements Screen {
             }
         });
 
-        // Çıkış butonu
         Texture exitTex = game.assetManager.get("InterfacePng/exit.png", Texture.class);
         ImageButton exitBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(exitTex)));
         exitBtn.setSize(buttonSize, buttonSize);
@@ -139,7 +136,6 @@ public class FirstScreen implements Screen {
             }
         });
 
-        // Sonraki şarkı butonu
         Texture nextTex = game.assetManager.get("InterfacePng/next.png", Texture.class);
         ImageButton nextBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(nextTex)));
         nextBtn.setSize(buttonSize, buttonSize);
@@ -156,7 +152,6 @@ public class FirstScreen implements Screen {
         buttonStage.addActor(nextBtn);
     }
 
-
     private void resetShotState() {
         clickStage = 0;
         kaleciKararVerdi = false;
@@ -170,27 +165,26 @@ public class FirstScreen implements Screen {
         if (oyuncuSirasi) atisSayisiOyuncu++;
         else atisSayisiBot++;
 
+        boolean skorA_Ustun = skorBoard.getSkorA() > skorBoard.getSkorB();
+        boolean skorB_Ustun = skorBoard.getSkorB() > skorBoard.getSkorA();
+
         if (!seriPenaltilar && atisSayisiOyuncu >= MAX_ATIS && atisSayisiBot >= MAX_ATIS) {
-            if (skorBoard.getSkorSaldiran() == skorBoard.getSkorSavunan()) {
+            if (skorBoard.getSkorA() == skorBoard.getSkorB()) {
                 seriPenaltilar = true;
             } else {
                 oyunBitti = true;
-                kazananTakim = skorBoard.getSkorSaldiran() > skorBoard.getSkorSavunan()
-                    ? skorBoard.getTakimSaldiran() : skorBoard.getTakimSavunan();
+                kazananTakim = skorA_Ustun ? skorBoard.getTakimA() : skorBoard.getTakimB();
                 return;
             }
         }
 
-        if (seriPenaltilar && Math.abs(skorBoard.getSkorSaldiran() - skorBoard.getSkorSavunan()) >= 1
-            && atisSayisiOyuncu > MAX_ATIS && atisSayisiOyuncu == atisSayisiBot) {
+        if (seriPenaltilar && Math.abs(skorBoard.getSkorA() - skorBoard.getSkorB()) >= 1 && atisSayisiOyuncu > MAX_ATIS && atisSayisiOyuncu == atisSayisiBot) {
             oyunBitti = true;
-            kazananTakim = skorBoard.getSkorSaldiran() > skorBoard.getSkorSavunan()
-                ? skorBoard.getTakimSaldiran() : skorBoard.getTakimSavunan();
+            kazananTakim = skorA_Ustun ? skorBoard.getTakimA() : skorBoard.getTakimB();
             return;
         }
 
         oyuncuSirasi = !oyuncuSirasi;
-        skorBoard.takimlariDegistir();
         clickStage = 0;
         shoot.reset();
 
@@ -223,58 +217,42 @@ public class FirstScreen implements Screen {
             }
 
             shoot.updateBall(delta);
+            Vector2 topPozisyon = shoot.getBallPosition();
+            Rectangle kaleAlan = kale.getAlan();
 
             if (oyuncuSirasi) {
-                Vector2 topPozisyon = shoot.getBallPosition();
-                Rectangle kaleAlan = kale.getAlan();
-
-                if (kaleAlan.contains(topPozisyon) &&
-                    shoot.getVelocity().len() > 50f &&
-                    shoot.isSaved(kaleci.getSecilenYon())) {
-
+                if (kaleAlan.contains(topPozisyon) && shoot.getVelocity().len() > 50f && shoot.isSaved(kaleci.getSecilenYon())) {
                     kurtardi = true;
-                    skorBoard.kurtardi();
+                    skorBoard.addShot(true, false);
                     mesajTimer = 2f;
                     resetShotState();
-
                 } else if (shoot.isGoal(kale)) {
                     golOldu = true;
-                    skorBoard.golAtti();
+                    skorBoard.addShot(true, true);
                     mesajTimer = 2f;
                     resetShotState();
-
                 } else if (shoot.isShotComplete(kale)) {
+                    skorBoard.addShot(true, false);
+                    resetShotState();
+                    tamamlaSira();
+                }
+            } else {
+                if (kaleAlan.contains(topPozisyon) && shoot.getVelocity().len() > 50f && kaleciPozisyonKilitli && topPozisyon.x > oyuncuKaleciX && topPozisyon.x < oyuncuKaleciX + 200f) {
+                    kurtardi = true;
+                    skorBoard.addShot(false, false);
+                    mesajTimer = 2f;
+                    resetShotState();
+                } else if (shoot.isGoal(kale)) {
+                    golOldu = true;
+                    skorBoard.addShot(false, true);
+                    mesajTimer = 2f;
+                    resetShotState();
+                } else if (shoot.isShotComplete(kale)) {
+                    skorBoard.addShot(false, false);
                     resetShotState();
                     tamamlaSira();
                 }
             }
-
-            else {
-                Vector2 topPozisyon = shoot.getBallPosition();
-                Rectangle kaleAlan = kale.getAlan();
-
-                if (kaleAlan.contains(topPozisyon) &&
-                    shoot.getVelocity().len() > 50f &&
-                    kaleciPozisyonKilitli &&
-                    topPozisyon.x > oyuncuKaleciX && topPozisyon.x < oyuncuKaleciX + 200f) {
-
-                    kurtardi = true;
-                    skorBoard.kurtardi();
-                    mesajTimer = 2f;
-                    resetShotState();
-
-                } else if (shoot.isGoal(kale)) {
-                    golOldu = true;
-                    skorBoard.golAtti();
-                    mesajTimer = 2f;
-                    resetShotState();
-
-                } else if (shoot.isShotComplete(kale)) {
-                    resetShotState();
-                    tamamlaSira();
-                }
-            }
-
         }
 
         game.batch.begin();
@@ -298,15 +276,10 @@ public class FirstScreen implements Screen {
                 returnScreen = null;
             }
         }
-
-        font.getData().setScale(1.5f);
-        font.setColor(Color.WHITE);
-        font.draw(game.batch, skorBoard.getTakimSaldiran() + ": " + skorBoard.getSkorSaldiran(), Gdx.graphics.getWidth() - 400, 100);
-        font.draw(game.batch, skorBoard.getTakimSavunan() + ": " + skorBoard.getSkorSavunan(), Gdx.graphics.getWidth() - 400, 70);
         game.batch.end();
 
         drawIndicators();
-
+        drawScoreCircles();
         buttonStage.act(delta);
         buttonStage.draw();
     }
@@ -331,6 +304,52 @@ public class FirstScreen implements Screen {
         }
     }
 
+    private void drawScoreCircles() {
+        int radius = 15;
+        int spacing = 40;
+        int totalWidth = spacing * 5;
+        int circleStartX = Gdx.graphics.getWidth() - totalWidth - 50;
+        int startYOpponent = 40;
+        int startYPlayer = startYOpponent + 50;
+
+        int maxAtis = Math.max(skorBoard.getAtislarA().size(), skorBoard.getAtislarB().size());
+        maxAtis = Math.max(maxAtis, 5);
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        for (int i = 0; i < maxAtis; i++) {
+            // A takımı
+            shapeRenderer.setColor(i < skorBoard.getAtislarA().size()
+                ? (skorBoard.getAtislarA().get(i) ? Color.GREEN : Color.RED)
+                : Color.LIGHT_GRAY);
+            shapeRenderer.circle(circleStartX + i * spacing, startYPlayer, radius);
+
+            // B takımı
+            shapeRenderer.setColor(i < skorBoard.getAtislarB().size()
+                ? (skorBoard.getAtislarB().get(i) ? Color.GREEN : Color.RED)
+                : Color.LIGHT_GRAY);
+            shapeRenderer.circle(circleStartX + i * spacing, startYOpponent, radius);
+        }
+        shapeRenderer.end();
+
+        // Takım isimlerinin genişliğini ölç
+        BitmapFont.BitmapFontData fontData = font.getData();
+        fontData.setScale(1.8f);
+        GlyphLayout layoutA = new GlyphLayout(font, skorBoard.getTakimA());
+        GlyphLayout layoutB = new GlyphLayout(font, skorBoard.getTakimB());
+
+        float textXA = circleStartX - layoutA.width - 30;
+        float textXB = circleStartX - layoutB.width - 30;
+
+        game.batch.begin();
+        font.setColor(Color.WHITE);
+        font.draw(game.batch, skorBoard.getTakimA(), textXA, startYPlayer + 5);
+        font.draw(game.batch, skorBoard.getTakimB(), textXB, startYOpponent + 5);
+        game.batch.end();
+    }
+
+
+
+
     @Override public void resize(int width, int height) {
         if (buttonStage != null)
             buttonStage.getViewport().update(width, height, true);
@@ -346,5 +365,5 @@ public class FirstScreen implements Screen {
         if (buttonStage != null) buttonStage.dispose();
     }
 
-    public void onGameEnd(boolean playerWon, String opponentTeam){}
+    public void onGameEnd(boolean playerWon, String opponentTeam) {}
 }
