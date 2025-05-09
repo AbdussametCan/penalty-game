@@ -347,9 +347,6 @@ public class FirstScreen implements Screen {
         game.batch.end();
     }
 
-
-
-
     @Override public void resize(int width, int height) {
         if (buttonStage != null)
             buttonStage.getViewport().update(width, height, true);
@@ -364,6 +361,5 @@ public class FirstScreen implements Screen {
         shapeRenderer.dispose();
         if (buttonStage != null) buttonStage.dispose();
     }
-
     public void onGameEnd(boolean playerWon, String opponentTeam) {}
 }
