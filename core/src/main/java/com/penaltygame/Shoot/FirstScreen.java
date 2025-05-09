@@ -336,12 +336,12 @@ public class FirstScreen implements Screen {
         GlyphLayout layoutA = new GlyphLayout(font, skorBoard.getTakimA());
         GlyphLayout layoutB = new GlyphLayout(font, skorBoard.getTakimB());
 
-        float textXA = circleStartX - layoutA.width - 30;
-        float textXB = circleStartX - layoutB.width - 30;
+        float textXA = circleStartX - layoutA.width -220;
+        float textXB = circleStartX - layoutB.width - 220;
 
         game.batch.begin();
         font.setColor(Color.WHITE);
-        font.draw(game.batch, skorBoard.getTakimA(), textXA, startYPlayer + 5);
+        font.draw(game.batch, skorBoard.getTakimA(), textXA, startYPlayer - 5);
         font.draw(game.batch, skorBoard.getTakimB(), textXB, startYOpponent + 5);
         game.batch.end();
     }
