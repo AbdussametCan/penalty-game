@@ -65,6 +65,7 @@ public class FirstScreen implements Screen {
         this.opponentTeam = opponentTeam;
         this.returnScreen = returnScreen;
 
+        // Asset yüklemeleri
         backgroundTexture = new Texture("field_background.png");
         ballTexture = new Texture("Shoot/ball.png");
         arrowTexture = game.assetManager.get("InterfacePng/arrow.png", Texture.class);
@@ -107,6 +108,7 @@ public class FirstScreen implements Screen {
         float buttonSize = 110f;
         float padding = 20f;
 
+        // Ses butonu
         Texture soundOn = game.assetManager.get("InterfacePng/soundOn.png", Texture.class);
         Texture soundOff = game.assetManager.get("InterfacePng/soundOff.png", Texture.class);
         final boolean[] soundState = {true};
@@ -124,6 +126,7 @@ public class FirstScreen implements Screen {
             }
         });
 
+        // Çıkış butonu
         Texture exitTex = game.assetManager.get("InterfacePng/exit.png", Texture.class);
         ImageButton exitBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(exitTex)));
         exitBtn.setSize(buttonSize, buttonSize);
@@ -135,6 +138,7 @@ public class FirstScreen implements Screen {
             }
         });
 
+        // Sonraki şarkı butonu
         Texture nextTex = game.assetManager.get("InterfacePng/next.png", Texture.class);
         ImageButton nextBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(nextTex)));
         nextBtn.setSize(buttonSize, buttonSize);
@@ -151,6 +155,7 @@ public class FirstScreen implements Screen {
         buttonStage.addActor(nextBtn);
     }
 
+
     private void resetShotState() {
         clickStage = 0;
         kaleciKararVerdi = false;
@@ -165,22 +170,26 @@ public class FirstScreen implements Screen {
         else atisSayisiBot++;
 
         if (!seriPenaltilar && atisSayisiOyuncu >= MAX_ATIS && atisSayisiBot >= MAX_ATIS) {
-            if (skorBoard.getPlayerScore() == skorBoard.getBotScore()) {
+            if (skorBoard.getSkorSaldiran() == skorBoard.getSkorSavunan()) {
                 seriPenaltilar = true;
             } else {
                 oyunBitti = true;
-                kazananTakim = skorBoard.getPlayerScore() > skorBoard.getBotScore() ? playerTeam : opponentTeam;
+                kazananTakim = skorBoard.getSkorSaldiran() > skorBoard.getSkorSavunan()
+                    ? skorBoard.getTakimSaldiran() : skorBoard.getTakimSavunan();
                 return;
             }
         }
 
-        if (seriPenaltilar && Math.abs(skorBoard.getPlayerScore() - skorBoard.getBotScore()) >= 1 && atisSayisiOyuncu > MAX_ATIS && atisSayisiOyuncu == atisSayisiBot) {
+        if (seriPenaltilar && Math.abs(skorBoard.getSkorSaldiran() - skorBoard.getSkorSavunan()) >= 1
+            && atisSayisiOyuncu > MAX_ATIS && atisSayisiOyuncu == atisSayisiBot) {
             oyunBitti = true;
-            kazananTakim = skorBoard.getPlayerScore() > skorBoard.getBotScore() ? playerTeam : opponentTeam;
+            kazananTakim = skorBoard.getSkorSaldiran() > skorBoard.getSkorSavunan()
+                ? skorBoard.getTakimSaldiran() : skorBoard.getTakimSavunan();
             return;
         }
 
         oyuncuSirasi = !oyuncuSirasi;
+        skorBoard.takimlariDegistir();
         clickStage = 0;
         shoot.reset();
 
@@ -218,16 +227,16 @@ public class FirstScreen implements Screen {
                 if (shoot.isSaved(kaleci.getSecilenYon())) {
                     kurtardi = true; mesajTimer = 2f; resetShotState();
                 } else if (shoot.isGoal(kale)) {
-                    golOldu = true; skorBoard.golAtti(true); mesajTimer = 2f; resetShotState();
+                    golOldu = true; skorBoard.golAtti(); mesajTimer = 2f; resetShotState();
                 } else if (shoot.isShotComplete(kale)) {
                     resetShotState(); tamamlaSira();
                 }
             } else {
                 float topX = shoot.getBallPosition().x;
                 if (kaleciPozisyonKilitli && topX > oyuncuKaleciX && topX < oyuncuKaleciX + 200f) {
-                    kurtardi = true; mesajTimer = 2f; resetShotState();
+                    kurtardi = true; skorBoard.kurtardi(); mesajTimer = 2f; resetShotState();
                 } else if (shoot.isGoal(kale)) {
-                    golOldu = true; skorBoard.golAtti(false); mesajTimer = 2f; resetShotState();
+                    golOldu = true; skorBoard.golAtti(); mesajTimer = 2f; resetShotState();
                 } else if (shoot.isShotComplete(kale)) {
                     resetShotState(); tamamlaSira();
                 }
@@ -258,8 +267,8 @@ public class FirstScreen implements Screen {
 
         font.getData().setScale(1.5f);
         font.setColor(Color.WHITE);
-        font.draw(game.batch, playerTeam + ": " + skorBoard.getPlayerScore(), Gdx.graphics.getWidth() - 400, 100);
-        font.draw(game.batch, opponentTeam + ": " + skorBoard.getBotScore(), Gdx.graphics.getWidth() - 400, 70);
+        font.draw(game.batch, skorBoard.getTakimSaldiran() + ": " + skorBoard.getSkorSaldiran(), Gdx.graphics.getWidth() - 400, 100);
+        font.draw(game.batch, skorBoard.getTakimSavunan() + ": " + skorBoard.getSkorSavunan(), Gdx.graphics.getWidth() - 400, 70);
         game.batch.end();
 
         drawIndicators();

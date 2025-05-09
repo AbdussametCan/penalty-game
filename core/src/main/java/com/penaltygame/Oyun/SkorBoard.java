@@ -1,39 +1,63 @@
 package com.penaltygame.Oyun;
 
 public class SkorBoard {
-    private String playerTeam;
-    private String botTeam;
-    private int playerScore = 0;
-    private int botScore = 0;
+    private String takimSaldiran;
+    private String takimSavunan;
+    private int skorSaldiran = 0;
+    private int skorSavunan = 0;
 
-    public SkorBoard(String playerTeam, String botTeam) {
-        this.playerTeam = playerTeam;
-        this.botTeam = botTeam;
+    public SkorBoard(String takimSaldiran, String takimSavunan) {
+        this.takimSaldiran = takimSaldiran;
+        this.takimSavunan = takimSavunan;
     }
 
-    public void golAtti(boolean playerShooting) {
-        if (playerShooting) playerScore++;
-        else botScore++;
+    // Gol atan taraf skor alır — şu an saldıran
+    public void golAtti() {
+        skorSaldiran++;
+    }
+
+    // Kurtarışta skor değişmez
+    public void kurtardi() {
+        // Sadece görsel mesaj için
+    }
+
+    // Skorları ve takımları döndür
+    public void takimlariDegistir() {
+        String tempTakim = takimSaldiran;
+        takimSaldiran = takimSavunan;
+        takimSavunan = tempTakim;
+
+        int tempSkor = skorSaldiran;
+        skorSaldiran = skorSavunan;
+        skorSavunan = tempSkor;
     }
 
     public void reset() {
-        playerScore = 0;
-        botScore = 0;
+        skorSaldiran = 0;
+        skorSavunan = 0;
     }
 
-    public String getPlayerTeam() {
-        return playerTeam;
+    public String getTakimSaldiran() {
+        return takimSaldiran;
     }
 
-    public String getBotTeam() {
-        return botTeam;
+    public String getTakimSavunan() {
+        return takimSavunan;
     }
 
-    public int getPlayerScore() {
-        return playerScore;
+    public int getSkorSaldiran() {
+        return skorSaldiran;
     }
 
-    public int getBotScore() {
-        return botScore;
+    public int getSkorSavunan() {
+        return skorSavunan;
+    }
+
+    public String getSaldiranTakimAdi() {
+        return takimSaldiran;
+    }
+
+    public String getSavunanTakimAdi() {
+        return takimSavunan;
     }
 }
