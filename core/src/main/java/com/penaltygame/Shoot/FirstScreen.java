@@ -1,5 +1,6 @@
 package com.penaltygame.Shoot;
 
+import com.badlogic.gdx.math.Rectangle;
 import com.penaltygame.GameScreen;
 import com.penaltygame.Screens.ResultScreen;
 import com.penaltygame.bot.OyuncuBot;
@@ -224,23 +225,56 @@ public class FirstScreen implements Screen {
             shoot.updateBall(delta);
 
             if (oyuncuSirasi) {
-                if (shoot.isSaved(kaleci.getSecilenYon())) {
-                    kurtardi = true; mesajTimer = 2f; resetShotState();
+                Vector2 topPozisyon = shoot.getBallPosition();
+                Rectangle kaleAlan = kale.getAlan();
+
+                if (kaleAlan.contains(topPozisyon) &&
+                    shoot.getVelocity().len() > 50f &&
+                    shoot.isSaved(kaleci.getSecilenYon())) {
+
+                    kurtardi = true;
+                    skorBoard.kurtardi();
+                    mesajTimer = 2f;
+                    resetShotState();
+
                 } else if (shoot.isGoal(kale)) {
-                    golOldu = true; skorBoard.golAtti(); mesajTimer = 2f; resetShotState();
+                    golOldu = true;
+                    skorBoard.golAtti();
+                    mesajTimer = 2f;
+                    resetShotState();
+
                 } else if (shoot.isShotComplete(kale)) {
-                    resetShotState(); tamamlaSira();
-                }
-            } else {
-                float topX = shoot.getBallPosition().x;
-                if (kaleciPozisyonKilitli && topX > oyuncuKaleciX && topX < oyuncuKaleciX + 200f) {
-                    kurtardi = true; skorBoard.kurtardi(); mesajTimer = 2f; resetShotState();
-                } else if (shoot.isGoal(kale)) {
-                    golOldu = true; skorBoard.golAtti(); mesajTimer = 2f; resetShotState();
-                } else if (shoot.isShotComplete(kale)) {
-                    resetShotState(); tamamlaSira();
+                    resetShotState();
+                    tamamlaSira();
                 }
             }
+
+            else {
+                Vector2 topPozisyon = shoot.getBallPosition();
+                Rectangle kaleAlan = kale.getAlan();
+
+                if (kaleAlan.contains(topPozisyon) &&
+                    shoot.getVelocity().len() > 50f &&
+                    kaleciPozisyonKilitli &&
+                    topPozisyon.x > oyuncuKaleciX && topPozisyon.x < oyuncuKaleciX + 200f) {
+
+                    kurtardi = true;
+                    skorBoard.kurtardi();
+                    mesajTimer = 2f;
+                    resetShotState();
+
+                } else if (shoot.isGoal(kale)) {
+                    golOldu = true;
+                    skorBoard.golAtti();
+                    mesajTimer = 2f;
+                    resetShotState();
+
+                } else if (shoot.isShotComplete(kale)) {
+                    resetShotState();
+                    tamamlaSira();
+                }
+            }
+
         }
 
         game.batch.begin();
@@ -312,5 +346,5 @@ public class FirstScreen implements Screen {
         if (buttonStage != null) buttonStage.dispose();
     }
 
-    public void onGameEnd(boolean playerWon, String opponentTeam) {}
+    public void onGameEnd(boolean playerWon, String opponentTeam){}
 }
