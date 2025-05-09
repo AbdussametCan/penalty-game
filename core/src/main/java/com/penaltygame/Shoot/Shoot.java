@@ -126,11 +126,9 @@ public class Shoot {
     public boolean isDirectionLocked() {
         return directionLocked;
     }
-
     public boolean isPowerLocked() {
         return powerLocked;
     }
-
     public float getDirectionTimer() {
         return directionTimer;
     }

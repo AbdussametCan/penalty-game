@@ -283,7 +283,6 @@ public class FirstScreen implements Screen {
         buttonStage.act(delta);
         buttonStage.draw();
     }
-
     private void drawIndicators() {
         if (shoot.isShooting() || oyunBitti || !oyuncuSirasi) return;
         if (!shoot.isDirectionLocked()) {

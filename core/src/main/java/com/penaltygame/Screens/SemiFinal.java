@@ -118,7 +118,6 @@ public class SemiFinal extends BaseScreen implements GameScreen {
         btn.getLabel().setAlignment(Align.center);
         return btn;
     }
-
     @Override
     public void onGameEnd(boolean playerWon, String opponentTeam) {
         List<String> finalTeams = new ArrayList<>();

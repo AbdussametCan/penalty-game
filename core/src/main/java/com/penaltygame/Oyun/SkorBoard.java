@@ -38,7 +38,6 @@ public class SkorBoard {
     public int getSkorB() {
         return (int) atislarB.stream().filter(b -> b).count();
     }
-
     public String getTakimA() {
         return takimA;
     }
