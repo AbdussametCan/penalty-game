@@ -42,6 +42,10 @@ public class Shoot {
         }
     }
 
+    public Vector2 getVelocity() {
+        return velocity;
+    }
+
     public void lockDirection() {
         directionValue = directionTimer;
         directionLocked = true;
