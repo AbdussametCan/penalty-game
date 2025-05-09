@@ -13,22 +13,22 @@ import com.penaltygame.PenaltyGame;
 import com.penaltygame.GameScreen;
 import com.penaltygame.Shoot.FirstScreen;
 
-import java.util.*;
 import java.util.List;
 
 public class FinalScreen extends BaseScreen implements GameScreen {
 
-    private final List<String> semiFinalWinners;  // SemiFinal'dan gelen kazananlar
+    private final List<String> semiFinalWinners;
     private final String playerTeam;
     private final String opponentTeam;
     private final String imagePath;
     private final String trophyPath;
     private final List<String> quarterFinalTeams;
     private final String leagueName;
+    private final boolean playerStartedOnLeft;
 
-    private String finalWinner = null;
-
-    public FinalScreen(PenaltyGame game, List<String> quarterFinalTeams, List<String> semiFinalWinners, String playerTeam, String opponentTeam, String imagePath, String trophyPath, String leagueName) {
+    public FinalScreen(PenaltyGame game, List<String> quarterFinalTeams, List<String> semiFinalWinners,
+                       String playerTeam, String opponentTeam, String imagePath, String trophyPath,
+                       String leagueName, boolean playerStartedOnLeft) {
         super(game);
         this.quarterFinalTeams = quarterFinalTeams;
         this.semiFinalWinners = semiFinalWinners;
@@ -37,9 +37,8 @@ public class FinalScreen extends BaseScreen implements GameScreen {
         this.imagePath = imagePath;
         this.trophyPath = trophyPath;
         this.leagueName = leagueName;
-
+        this.playerStartedOnLeft = playerStartedOnLeft;
     }
-
 
     @Override
     protected void addContent() {
@@ -47,20 +46,20 @@ public class FinalScreen extends BaseScreen implements GameScreen {
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
 
-        // Bracket görseli (Çeyrek final, Yarı final, Final için)
+        // Bracket arka planı
         Texture bracketTexture = new Texture(Gdx.files.internal("bracket.png"));
         Image bracketImage = new Image(bracketTexture);
-        float scale = 1.5f;
-        bracketImage.setSize(bracketTexture.getWidth() * scale, bracketTexture.getHeight() * scale);
+        bracketImage.setSize(bracketTexture.getWidth() * 1.5f, bracketTexture.getHeight() * 1.5f);
         bracketImage.setPosition((screenWidth - bracketImage.getWidth()) / 2f, (screenHeight - bracketImage.getHeight()) / 2f);
         stage.addActor(bracketImage);
 
-        // Çeyrek final takımlarını ekle
+
+
+        // Çeyrek final (quarter) takımları
         float[][] quarterPositions = {
             {90, 685}, {90, 575}, {90, 461}, {90, 350},
             {screenWidth - 255, 685}, {screenWidth - 255, 575}, {screenWidth - 255, 461}, {screenWidth - 255, 350}
         };
-
         for (int i = 0; i < quarterFinalTeams.size(); i++) {
             String team = quarterFinalTeams.get(i);
             TextButton btn = createTeamButton(team, skin);
@@ -68,12 +67,11 @@ public class FinalScreen extends BaseScreen implements GameScreen {
             stage.addActor(btn);
         }
 
-        // Yarı final takımlarını ekle
+        // Yarı final (semi) takımları
         float[][] semiPositions = {
             {375, 630}, {375, 406},
             {screenWidth - 540, 630}, {screenWidth - 540, 406}
         };
-
         for (int i = 0; i < semiFinalWinners.size() && i < semiPositions.length; i++) {
             String team = semiFinalWinners.get(i);
             TextButton btn = createTeamButton(team, skin);
@@ -81,28 +79,27 @@ public class FinalScreen extends BaseScreen implements GameScreen {
             stage.addActor(btn);
         }
 
-        // Finalistleri ekle (Kazananlar)
+        // Finalistlerin pozisyonları
         float[][] finalPositions = {
             {665, 517}, {screenWidth - 827, 517}
         };
 
-        List<String> finalistler = new ArrayList<>();
-        if (semiFinalWinners.contains(playerTeam)) finalistler.add(playerTeam);
-        if (semiFinalWinners.contains(opponentTeam)) finalistler.add(opponentTeam);
+        String leftTeam = playerStartedOnLeft ? playerTeam : opponentTeam;
+        String rightTeam = playerStartedOnLeft ? opponentTeam : playerTeam;
 
-        for (int i = 0; i < finalistler.size(); i++) {
-            String team = finalistler.get(i);
-            TextButton btn = createTeamButton(team, skin);
-            btn.setPosition(finalPositions[i][0], finalPositions[i][1]);
-            stage.addActor(btn);
-        }
+        TextButton leftBtn = createTeamButton(leftTeam, skin);
+        leftBtn.setPosition(finalPositions[0][0], finalPositions[0][1]);
+        stage.addActor(leftBtn);
+
+        TextButton rightBtn = createTeamButton(rightTeam, skin);
+        rightBtn.setPosition(finalPositions[1][0], finalPositions[1][1]);
+        stage.addActor(rightBtn);
 
         // Play butonu
         Texture playTexture = game.assetManager.get("InterfacePng/play.png", Texture.class);
         ImageButton playButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(playTexture)));
         playButton.setSize(300, 150);
         playButton.setPosition(screenWidth - 300, 20);
-
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -111,7 +108,7 @@ public class FinalScreen extends BaseScreen implements GameScreen {
         });
         stage.addActor(playButton);
 
-        // Şampiyonluk kupası
+        // Kupa ve yol görseli
         Texture trophyTexture = game.assetManager.get(trophyPath, Texture.class);
         Image trophyImage = new Image(trophyTexture);
         trophyImage.setSize(350, 350);
@@ -124,8 +121,6 @@ public class FinalScreen extends BaseScreen implements GameScreen {
         stage.addActor(roadImage);
     }
 
-
-    // Takım butonları için
     private TextButton createTeamButton(String team, Skin skin) {
         TextButton btn;
         if (team.equals(playerTeam)) {
@@ -143,7 +138,6 @@ public class FinalScreen extends BaseScreen implements GameScreen {
         return btn;
     }
 
-    // Finalde kazananı belirleyip gösterme
     @Override
     public void onGameEnd(boolean playerWon, String opponentTeam) {
         game.setScreen(new ResultScreen(game, playerWon, leagueName));

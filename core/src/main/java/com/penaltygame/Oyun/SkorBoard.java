@@ -42,7 +42,6 @@ public class SkorBoard {
     public String getTakimA() {
         return takimA;
     }
-
     public String getTakimB() {
         return takimB;
     }

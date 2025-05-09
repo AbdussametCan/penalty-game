@@ -361,6 +361,5 @@ public class FirstScreen implements Screen {
         shapeRenderer.dispose();
         if (buttonStage != null) buttonStage.dispose();
     }
-
     public void onGameEnd(boolean playerWon, String opponentTeam) {}
 }
