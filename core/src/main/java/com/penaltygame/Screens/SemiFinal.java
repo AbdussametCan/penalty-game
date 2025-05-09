@@ -14,7 +14,6 @@ import com.penaltygame.Shoot.FirstScreen;
 import com.penaltygame.GameScreen;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class SemiFinal extends BaseScreen implements GameScreen {
@@ -25,7 +24,6 @@ public class SemiFinal extends BaseScreen implements GameScreen {
     private final String imagePath;
     private final String trophyPath;
     private final String leagueName;
-
 
     public SemiFinal(PenaltyGame game, List<String> tumTakimlar, List<String> kazananlar, String playerTeam, String imagePath, String trophyPath, String leagueName) {
         super(game);
@@ -81,11 +79,18 @@ public class SemiFinal extends BaseScreen implements GameScreen {
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                List<String> rakipler = new ArrayList<>(kazananlar);
-                rakipler.remove(playerTeam);
-                Collections.shuffle(rakipler);
-                String rakip = rakipler.get(0);
-                game.setScreen(new FirstScreen(game, playerTeam, rakip, SemiFinal.this));
+                String rakip = null;
+
+                if (kazananlar.size() == 4) {
+                    if (playerTeam.equals(kazananlar.get(0))) rakip = kazananlar.get(1);
+                    else if (playerTeam.equals(kazananlar.get(1))) rakip = kazananlar.get(0);
+                    else if (playerTeam.equals(kazananlar.get(2))) rakip = kazananlar.get(3);
+                    else if (playerTeam.equals(kazananlar.get(3))) rakip = kazananlar.get(2);
+                }
+
+                if (rakip != null) {
+                    game.setScreen(new FirstScreen(game, playerTeam, rakip, SemiFinal.this));
+                }
             }
         });
         stage.addActor(playButton);
@@ -100,7 +105,6 @@ public class SemiFinal extends BaseScreen implements GameScreen {
         roadImage.setSize(1000, 200);
         roadImage.setPosition((screenWidth - roadImage.getWidth()) / 2f, screenHeight - roadImage.getHeight() - 75);
         stage.addActor(roadImage);
-
     }
 
     private TextButton createTeamButton(String team, Skin skin) {
@@ -127,19 +131,21 @@ public class SemiFinal extends BaseScreen implements GameScreen {
         String winner = playerWon ? playerTeam : opponentTeam;
         finalTeams.add(winner);
 
-        // Oyuncunun eşleştiği ikili
-        List<String> kalanKazananlar = new ArrayList<>(kazananlar);
-        kalanKazananlar.remove(playerTeam);
-        kalanKazananlar.remove(opponentTeam);
+        // Eşleşmeye göre diğer finaliste karar ver
+        String digerFinalist = null;
 
-        // Diğer eşleşmeden rastgele kazanan seç
-        if (kalanKazananlar.size() == 2) {
-            Collections.shuffle(kalanKazananlar);
-            finalTeams.add(kalanKazananlar.get(0));
+        if (kazananlar.size() == 4) {
+            if (playerTeam.equals(kazananlar.get(0)) || playerTeam.equals(kazananlar.get(1))) {
+                digerFinalist = kazananlar.get(2).equals(opponentTeam) ? kazananlar.get(3) : kazananlar.get(2);
+            } else if (playerTeam.equals(kazananlar.get(2)) || playerTeam.equals(kazananlar.get(3))) {
+                digerFinalist = kazananlar.get(0).equals(opponentTeam) ? kazananlar.get(1) : kazananlar.get(0);
+            }
         }
 
+        if (digerFinalist != null) {
+            finalTeams.add(digerFinalist);
+        }
 
         game.setScreen(new FinalScreen(game, tumTakimlar, kazananlar, winner, finalTeams.get(1), imagePath, trophyPath, leagueName));
     }
-
 }
