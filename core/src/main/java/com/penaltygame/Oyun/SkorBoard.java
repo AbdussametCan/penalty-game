@@ -46,7 +46,6 @@ public class SkorBoard {
     public String getTakimB() {
         return takimB;
     }
-
     public void reset() {
         atislarA.clear();
         atislarB.clear();

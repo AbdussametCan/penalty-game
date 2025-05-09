@@ -347,9 +347,6 @@ public class FirstScreen implements Screen {
         game.batch.end();
     }
 
-
-
-
     @Override public void resize(int width, int height) {
         if (buttonStage != null)
             buttonStage.getViewport().update(width, height, true);
