@@ -52,6 +52,11 @@ public class SemiFinal extends BaseScreen implements GameScreen {
         roadImage.setPosition((screenWidth - roadImage.getWidth()) / 2f, screenHeight - roadImage.getHeight() - 75);
         stage.addActor(roadImage);
 
+        Image trophyImage = new Image(game.assetManager.get(trophyPath, Texture.class));
+        trophyImage.setSize(350, 350);
+        trophyImage.setPosition((screenWidth - 350) / 2f, 375);
+        stage.addActor(trophyImage);
+
 
         // Çeyrek final pozisyonları
         float[][] quarterPositions = {
