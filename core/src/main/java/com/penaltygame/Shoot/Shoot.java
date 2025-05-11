@@ -5,99 +5,109 @@ import com.badlogic.gdx.math.Vector2;
 import com.penaltygame.Oyun.Kale;
 
 public class Shoot {
-    private Vector2 ballPosition, velocity;
-    private float directionTimer = 0f, powerTimer = 0f;
-    private boolean directionIncreasing = true, powerIncreasing = true;
-    private boolean directionLocked = false, powerLocked = false;
+    private Vector2 topPozisyon, hiz;
+    private float yonZamanlayici = 0f, gucZamanlayici = 0f;
+    private boolean yonArtisi = true, gucArtisi = true;
+    private boolean yonKilit = false, gucKilit = false;
     private boolean isShooting = false;
-    private float directionValue = 0f, powerValue = 0f;
+    private float yonDegeri = 0f, gucDegeri = 0f;
     private String topYonu = "";
 
+
     public Shoot() {
-        ballPosition = new Vector2(960, 150);
-        velocity = new Vector2();
+        topPozisyon = new Vector2(960, 150);
+        hiz= new Vector2();
     }
 
+    // Yön ve güç göstergelerini  günceller.
     public void updateBars(float delta) {
-        if (!directionLocked) {
-            directionTimer += (directionIncreasing ? 1 : -1) * delta;
-            if (directionTimer >= 1f) {
-                directionTimer = 1f;
-                directionIncreasing = false;
-            } else if (directionTimer <= 0f) {
-                directionTimer = 0f;
-                directionIncreasing = true;
+        if (!yonKilit) {
+            yonZamanlayici += (yonArtisi ? 1 : -1) * delta;
+            if (yonZamanlayici >= 1f) {
+                yonZamanlayici = 1f;
+                yonArtisi = false;
+            }
+            else if (yonZamanlayici <= 0f) {
+                yonZamanlayici = 0f;
+                yonArtisi = true;
             }
         }
 
-        if (!powerLocked && directionLocked) {
-            powerTimer += (powerIncreasing ? 1 : -1) * delta;
-            if (powerTimer >= 1f) {
-                powerTimer = 1f;
-                powerIncreasing = false;
-            } else if (powerTimer <= 0f) {
-                powerTimer = 0f;
-                powerIncreasing = true;
+        if (!gucKilit && yonKilit) {
+            gucZamanlayici += (gucArtisi ? 1 : -1) * delta;
+            if (gucZamanlayici >= 1f) {
+                gucZamanlayici = 1f;
+                gucArtisi = false;
+            }
+            else if (gucZamanlayici <= 0f) {
+                gucZamanlayici = 0f;
+                gucArtisi = true;
             }
         }
     }
 
     public Vector2 getVelocity() {
-        return velocity;
+        return hiz;
     }
 
+    // Oyuncu yön barını kilitlediğinde çağrılır.
     public void lockDirection() {
-        directionValue = directionTimer;
-        directionLocked = true;
+        yonDegeri = yonZamanlayici;
+        yonKilit = true;
     }
 
+    // Oyuncu güç barını kilitlediğinde çağrılır.
     public void lockPower() {
-        powerValue = powerTimer;
-        powerLocked = true;
+        gucDegeri = gucZamanlayici;
+        gucKilit = true;
 
-        float angle = 90f + (directionValue - 0.5f) * 2f * 90f; // 180°'lik dönüş
-        float speed = 300f + powerValue * 700f;
+        float angle = 90f + (yonDegeri - 0.5f) * 2f * 90f; // 180°'lik dönüş
+        float speed = 300f + gucDegeri * 700f;
         float rad = (float) Math.toRadians(angle);
         Vector2 dir = new Vector2((float) Math.cos(rad), (float) Math.sin(rad)).nor();
-        velocity.set(dir.scl(speed));
+        hiz.set(dir.scl(speed));
         isShooting = true;
 
         topYonu = angle < 60 ? "right" : angle > 120 ? "left" : "center";
     }
 
+    // BOT'un şut çekmesini sağlar.
     public void baslaBotSutu(float angle, float power, float height) {
-        this.directionLocked = true;
-        this.powerLocked = true;
-        this.directionTimer = (angle - 90f) / 90f / 2f + 0.5f; // açıyı directionTimer'a çevir
-        this.powerTimer = power;
-        this.ballPosition.set(960, 150);
-        this.velocity.set(
+        this.yonKilit = true;
+        this.gucKilit = true;
+        this.yonZamanlayici = (angle - 90f) / 90f / 2f + 0.5f; // açıyı directionTimer'a çevir
+        this.gucZamanlayici = power;
+        this.topPozisyon.set(960, 150);
+        this.hiz.set(
             (float) Math.cos(Math.toRadians(angle)) * power * 800,
             height * power * 900
         );
         this.isShooting = true;
     }
 
+
+    // Topun pozisyonunun günceller.
     public void updateBall(float delta) {
         if (isShooting) {
-            ballPosition.mulAdd(velocity, delta);
+            topPozisyon.mulAdd(hiz, delta);
         }
     }
-
+    // Şutun tamamlanıp tamamlanmadığını kontrol eder.
     public boolean isShotComplete(Kale kale) {
-        return ballPosition.x < 0 || ballPosition.x > Gdx.graphics.getWidth() ||
-            ballPosition.y < 0 || ballPosition.y > Gdx.graphics.getHeight() ||
+        return topPozisyon.x < 0 || topPozisyon.x > Gdx.graphics.getWidth() ||
+            topPozisyon.y < 0 || topPozisyon.y > Gdx.graphics.getHeight() ||
             isGoal(kale) || isSaved();
     }
 
+    // Topun kaleye girip girmediğini kontrol eder.
     public boolean isGoal(Kale kale) {
-        return ballPosition.x >= kale.getAlan().x &&
-            ballPosition.x <= kale.getAlan().x + kale.getAlan().width &&
-            ballPosition.y >= kale.getAlan().y + kale.getAlan().height / 2;
+        return topPozisyon.x >= kale.getAlan().x &&
+            topPozisyon.x <= kale.getAlan().x + kale.getAlan().width &&
+            topPozisyon.y >= kale.getAlan().y + kale.getAlan().height / 2;
     }
-
+    // Topun kurtarılıp kurtarılmadığını kontrol eder.
     public boolean isSaved(String kaleciYonu) {
-        return ballPosition.y > 250 && ballPosition.y < 400 &&
+        return topPozisyon.y > 250 && topPozisyon.y < 400 &&
             kaleciYonu.equals(topYonu);
     }
 
@@ -105,18 +115,19 @@ public class Shoot {
         return false;
     }
 
+    // Topun ve ilgili tüm kontrol değişkenlerinin başlangıç durumuna sıfırlanması sağlar.
     public void reset() {
-        ballPosition.set(960, 150);
-        velocity.set(0, 0);
+        topPozisyon.set(960, 150);
+        hiz.set(0, 0);
         isShooting = false;
-        directionTimer = powerTimer = 0f;
-        directionLocked = powerLocked = false;
-        directionIncreasing = powerIncreasing = true;
+        yonZamanlayici = gucZamanlayici = 0f;
+        yonKilit = gucKilit = false;
+        yonArtisi = gucArtisi = true;
         topYonu = "";
     }
 
     public Vector2 getBallPosition() {
-        return ballPosition;
+        return topPozisyon;
     }
 
     public boolean isShooting() {
@@ -124,17 +135,17 @@ public class Shoot {
     }
 
     public boolean isDirectionLocked() {
-        return directionLocked;
+        return yonKilit;
     }
     public boolean isPowerLocked() {
-        return powerLocked;
+        return gucKilit;
     }
     public float getDirectionTimer() {
-        return directionTimer;
+        return yonZamanlayici;
     }
 
     public float getPowerTimer() {
-        return powerTimer;
+        return gucZamanlayici;
     }
 
     public String getTopYonu() {

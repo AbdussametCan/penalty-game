@@ -23,6 +23,7 @@ public class Kaleci {
         pozisyonlar.put("sag_üst", manager.get("Kaleci/sag_üst.png", Texture.class));
     }
 
+    //Aşağıda kaleci ile ilgili metotlar var.
     public void yeniYonSec(String topYonGercek) {
         bot.yeniYonSec(topYonGercek);
     }
@@ -35,13 +36,13 @@ public class Kaleci {
         return bot.getSecilenYon();
     }
 
-    public Texture getPozisyonTexture() {
-        String key = bot.getTextureKey();
+    public Texture getPozisyonResmi() {
+        String key = bot.getResimAnahtari();
         Texture texture = pozisyonlar.get(key);
 
         if (texture == null) {
             System.err.println("⚠ Kaleci pozisyon görseli bulunamadı → key: " + key);
-            return pozisyonlar.get("orta"); // fallback texture
+            return pozisyonlar.get("orta");
         }
 
         return texture;

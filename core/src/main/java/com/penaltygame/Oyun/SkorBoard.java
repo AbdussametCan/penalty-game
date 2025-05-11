@@ -15,10 +15,12 @@ public class SkorBoard {
         this.takimB = takimB;
     }
 
+
     public void addShot(boolean oyuncuSirada, boolean golOldu) {
         if (oyuncuSirada) {
             atislarA.add(golOldu);
-        } else {
+        }
+        else {
             atislarB.add(golOldu);
         }
     }
@@ -31,6 +33,7 @@ public class SkorBoard {
         return atislarB;
     }
 
+    // Maç skorunu tutar. MatchScreen'e aktarır.
     public int getSkorA() {
         return (int) atislarA.stream().filter(b -> b).count();
     }
@@ -43,9 +46,5 @@ public class SkorBoard {
     }
     public String getTakimB() {
         return takimB;
-    }
-    public void reset() {
-        atislarA.clear();
-        atislarB.clear();
     }
 }

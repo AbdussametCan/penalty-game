@@ -21,7 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.*;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-public class FirstScreen implements Screen {
+public class MatchScreen implements Screen {
 
     final PenaltyGame game;
     Texture ballTexture, backgroundTexture, arrowTexture;
@@ -60,7 +60,7 @@ public class FirstScreen implements Screen {
 
     private Stage buttonStage;
 
-    public FirstScreen(final PenaltyGame game, String playerTeam, String opponentTeam, GameScreen returnScreen) {
+    public MatchScreen(final PenaltyGame game, String playerTeam, String opponentTeam, GameScreen returnScreen) {
         this.game = game;
         this.playerTeam = playerTeam;
         this.opponentTeam = opponentTeam;
@@ -80,6 +80,8 @@ public class FirstScreen implements Screen {
 
     @Override
     public void show() {
+        // Oyun ekranı ilk kez görüntülendiğinde çalıştırılır.
+        // Sahne, arayüz elemanları ve giriş kontrolü gibi ilk ayarlamalar burada yapılır.
         buttonStage = new Stage(new ScreenViewport());
         addUIButtons();
         Gdx.input.setInputProcessor(new InputMultiplexer(buttonStage, new InputAdapter() {
@@ -91,11 +93,13 @@ public class FirstScreen implements Screen {
                     if (clickStage == 0) {
                         shoot.lockDirection();
                         clickStage++;
-                    } else if (clickStage == 1) {
+                    }
+                    else if (clickStage == 1) {
                         shoot.lockPower();
                         clickStage = 0;
                     }
-                } else {
+                }
+                else {
                     oyuncuKaleciX = Math.max(oyuncuKaleciMinX, Math.min(x - 100, oyuncuKaleciMaxX));
                     kaleciPozisyonKilitli = true;
                 }
@@ -104,24 +108,28 @@ public class FirstScreen implements Screen {
         }));
     }
 
+
+    // Arayüze ses aç/kapat işlevine sahip bir buton ekler.
     private void addUIButtons() {
         float buttonSize = 110f;
         float padding = 20f;
 
-        Texture soundOn = game.assetManager.get("InterfacePng/soundOn.png", Texture.class);
-        Texture soundOff = game.assetManager.get("InterfacePng/soundOff.png", Texture.class);
-        final boolean[] soundState = {true};
+        Texture sesAc = game.assetManager.get("InterfacePng/soundOn.png", Texture.class);
+        Texture sesKapat = game.assetManager.get("InterfacePng/soundOff.png", Texture.class);
+        final boolean[] sesDurumu = {true};
 
-        ImageButton soundBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(soundOn)));
-        soundBtn.setSize(buttonSize, buttonSize);
-        soundBtn.setPosition(Gdx.graphics.getWidth() - buttonSize - padding, Gdx.graphics.getHeight() - buttonSize - padding);
-        soundBtn.addListener(new ClickListener() {
+        ImageButton sesBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(sesAc)));
+        sesBtn.setSize(buttonSize, buttonSize);
+        sesBtn.setPosition(Gdx.graphics.getWidth() - buttonSize - padding, Gdx.graphics.getHeight() - buttonSize - padding);
+        sesBtn.addListener(new ClickListener() {
+
+            // Ses butonuna tıklanınca sesi açar/kapatır ve buton ikonunu günceller.
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                soundState[0] = !soundState[0];
-                Music music = game.getCurrentMusic();
-                if (music != null) music.setVolume(soundState[0] ? 1f : 0f);
-                soundBtn.getStyle().imageUp = new TextureRegionDrawable(new TextureRegion(soundState[0] ? soundOn : soundOff));
+                sesDurumu[0] = !sesDurumu[0];
+                Music muzik = game.getCurrentMusic();
+                if (muzik != null) muzik.setVolume(sesDurumu[0] ? 1f : 0f);
+                sesBtn.getStyle().imageUp = new TextureRegionDrawable(new TextureRegion(sesDurumu[0] ? sesAc : sesKapat));
             }
         });
 
@@ -136,28 +144,31 @@ public class FirstScreen implements Screen {
             }
         });
 
-        Texture nextTex = game.assetManager.get("InterfacePng/next.png", Texture.class);
-        ImageButton nextBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(nextTex)));
-        nextBtn.setSize(buttonSize, buttonSize);
-        nextBtn.setPosition(Gdx.graphics.getWidth() - 2 * (buttonSize + padding), Gdx.graphics.getHeight() - buttonSize - padding);
-        nextBtn.addListener(new ClickListener() {
+        Texture sonrakiResim = game.assetManager.get("InterfacePng/next.png", Texture.class);
+        ImageButton sonrakiButon = new ImageButton(new TextureRegionDrawable(new TextureRegion(sonrakiResim)));
+        sonrakiButon.setSize(buttonSize, buttonSize);
+        sonrakiButon.setPosition(Gdx.graphics.getWidth() - 2 * (buttonSize + padding), Gdx.graphics.getHeight() - buttonSize - padding);
+        sonrakiButon.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.skipToNextSong();
             }
         });
 
-        buttonStage.addActor(soundBtn);
+        buttonStage.addActor(sesBtn);
         buttonStage.addActor(exitBtn);
-        buttonStage.addActor(nextBtn);
+        buttonStage.addActor(sonrakiButon);
     }
 
+    // Yeni bir şut için oyuncu ve kaleci durumlarını sıfırlar.
     private void resetShotState() {
         clickStage = 0;
         kaleciKararVerdi = false;
         shoot.reset();
     }
 
+
+    // Şut sonrası durumu değerlendirir, skoru kontrol eder ve sıradaki oyuncuyu belirler.
     private void tamamlaSira() {
         kaleciKararVerdi = false;
         kaleciPozisyonKilitli = false;
@@ -171,7 +182,8 @@ public class FirstScreen implements Screen {
         if (!seriPenaltilar && atisSayisiOyuncu >= MAX_ATIS && atisSayisiBot >= MAX_ATIS) {
             if (skorBoard.getSkorA() == skorBoard.getSkorB()) {
                 seriPenaltilar = true;
-            } else {
+            }
+            else {
                 oyunBitti = true;
                 kazananTakim = skorA_Ustun ? skorBoard.getTakimA() : skorBoard.getTakimB();
                 return;
@@ -190,6 +202,8 @@ public class FirstScreen implements Screen {
 
         if (!oyuncuSirasi) botSutTimer = 2f;
     }
+
+    // Her karede oyunun durumunu günceller, şut süreçlerini yönetir ve sahneyi çizer.
 
     @Override
     public void render(float delta) {
@@ -226,28 +240,33 @@ public class FirstScreen implements Screen {
                     skorBoard.addShot(true, false);
                     mesajTimer = 2f;
                     resetShotState();
-                } else if (shoot.isGoal(kale)) {
+                }
+                else if (shoot.isGoal(kale)) {
                     golOldu = true;
                     skorBoard.addShot(true, true);
                     mesajTimer = 2f;
                     resetShotState();
-                } else if (shoot.isShotComplete(kale)) {
+                }
+                else if (shoot.isShotComplete(kale)) {
                     skorBoard.addShot(true, false);
                     resetShotState();
                     tamamlaSira();
                 }
-            } else {
+            }
+            else {
                 if (kaleAlan.contains(topPozisyon) && shoot.getVelocity().len() > 50f && kaleciPozisyonKilitli && topPozisyon.x > oyuncuKaleciX && topPozisyon.x < oyuncuKaleciX + 200f) {
                     kurtardi = true;
                     skorBoard.addShot(false, false);
                     mesajTimer = 2f;
                     resetShotState();
-                } else if (shoot.isGoal(kale)) {
+                }
+                else if (shoot.isGoal(kale)) {
                     golOldu = true;
                     skorBoard.addShot(false, true);
                     mesajTimer = 2f;
                     resetShotState();
-                } else if (shoot.isShotComplete(kale)) {
+                }
+                else if (shoot.isShotComplete(kale)) {
                     skorBoard.addShot(false, false);
                     resetShotState();
                     tamamlaSira();
@@ -262,13 +281,12 @@ public class FirstScreen implements Screen {
 
         float kaleciX = oyuncuSirasi ? kale.getAlan().x + (kale.getAlan().width - 200) / 2f : oyuncuKaleciX;
         float kaleciY = kale.getAlan().y - 50;
-        game.batch.draw(kaleci.getPozisyonTexture(), kaleciX, kaleciY, 200, 240);
+        game.batch.draw(kaleci.getPozisyonResmi(), kaleciX, kaleciY, 200, 240);
 
         font.getData().setScale(4f);
         if (golOldu) font.draw(game.batch, "GOOOOL!", 700, 600);
         else if (kurtardi) font.draw(game.batch, "KURTARDI!", 680, 600);
         else if (oyunBitti) {
-            font.draw(game.batch, kazananTakim + " KAZANDI!", 500, 650);
             if (returnScreen != null) {
                 boolean playerWon = kazananTakim.equals(playerTeam);
                 if (playerWon) returnScreen.onGameEnd(true, opponentTeam);
@@ -283,6 +301,9 @@ public class FirstScreen implements Screen {
         buttonStage.act(delta);
         buttonStage.draw();
     }
+
+    // Oyuncunun yön ve güç barı göstergelerini ekrana çizer.
+
     private void drawIndicators() {
         if (shoot.isShooting() || oyunBitti || !oyuncuSirasi) return;
         if (!shoot.isDirectionLocked()) {
@@ -303,6 +324,8 @@ public class FirstScreen implements Screen {
         }
     }
 
+    // Oyuncuların penaltı atış sonuçlarını dairelerle ve takım isimleriyle ekrana çizer.
+    // Skorboard ekrana gösterilir.
     private void drawScoreCircles() {
         int radius = 15;
         int spacing = 40;
@@ -346,6 +369,7 @@ public class FirstScreen implements Screen {
         game.batch.end();
     }
 
+    // Ekran boyutu değiştiğinde arayüz sahnesinin görünümünü günceller.
     @Override public void resize(int width, int height) {
         if (buttonStage != null)
             buttonStage.getViewport().update(width, height, true);
@@ -360,5 +384,7 @@ public class FirstScreen implements Screen {
         shapeRenderer.dispose();
         if (buttonStage != null) buttonStage.dispose();
     }
-    public void onGameEnd(boolean playerWon, String opponentTeam) {}
+    public void onGameEnd(boolean playerWon, String opponentTeam) {
+        // Bu ekranın sonunda bir şey olmadığı için çalışmıyor.
+    }
 }

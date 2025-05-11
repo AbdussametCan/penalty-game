@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.penaltygame.PenaltyGame;
-import com.penaltygame.Shoot.FirstScreen;
+import com.penaltygame.Shoot.MatchScreen;
 import com.penaltygame.GameScreen;
 
 import java.util.*;
@@ -27,7 +27,7 @@ public class QuarterFinal extends BaseScreen implements GameScreen {
     public QuarterFinal(PenaltyGame game, String[] teams, String selectedTeam, String imagePath, String trophyPath,String leagueName) {
         super(game);
         this.shuffledTeams = new ArrayList<>(Arrays.asList(teams));
-        Collections.shuffle(this.shuffledTeams); // ✔ TAKIMLAR RASTGELE KARISTIRILDI
+        Collections.shuffle(this.shuffledTeams);
         this.selectedTeam = selectedTeam;
         this.imagePath = imagePath;
         this.trophyPath = trophyPath;
@@ -40,6 +40,7 @@ public class QuarterFinal extends BaseScreen implements GameScreen {
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
 
+        //Eşleşme tablosu aktarılır.
         Texture bracketTexture = new Texture(Gdx.files.internal("bracket.png"));
         Image bracketImage = new Image(bracketTexture);
         float scale = 1.5f;
@@ -47,14 +48,17 @@ public class QuarterFinal extends BaseScreen implements GameScreen {
         bracketImage.setPosition((screenWidth - bracketImage.getWidth()) / 2f, (screenHeight - bracketImage.getHeight()) / 2f);
         stage.addActor(bracketImage);
 
+        //Takım isimlerinin fikstürdeki konumları.
         float[][] positions = {
             {90, 685}, {90, 575}, {90, 461}, {90, 350},
             {screenWidth - 255, 685}, {screenWidth - 255, 575}, {screenWidth - 255, 461}, {screenWidth - 255, 350}
         };
 
+        //Rastgele takım ataması.
         for (int i = 0; i < 8; i++) {
             String team = shuffledTeams.get(i);
 
+            //Seçtiğimiz takım kırmızı arka fonla gösterilir.
             TextButton teamButton;
             if (team.equals(selectedTeam)) {
                 TextButton.TextButtonStyle redStyle = new TextButton.TextButtonStyle();
@@ -62,7 +66,8 @@ public class QuarterFinal extends BaseScreen implements GameScreen {
                 redStyle.font = skin.getFont("default-font");
                 teamButton = new TextButton(team, redStyle);
                 teamButton.getLabel().setColor(Color.YELLOW);
-            } else {
+            }
+            else {
                 teamButton = new TextButton(team, skin);
             }
 
@@ -73,6 +78,8 @@ public class QuarterFinal extends BaseScreen implements GameScreen {
             stage.addActor(teamButton);
         }
 
+
+        //Play butonu.
         TextureRegionDrawable playDrawable = new TextureRegionDrawable(new TextureRegion(
             game.assetManager.get("InterfacePng/play.png", Texture.class)));
         ImageButton playButton = new ImageButton(playDrawable);
@@ -84,7 +91,7 @@ public class QuarterFinal extends BaseScreen implements GameScreen {
                 for (int i = 0; i < 8; i += 2) {
                     if (shuffledTeams.get(i).equals(selectedTeam) || shuffledTeams.get(i + 1).equals(selectedTeam)) {
                         String rakip = shuffledTeams.get(i).equals(selectedTeam) ? shuffledTeams.get(i + 1) : shuffledTeams.get(i);
-                        game.setScreen(new FirstScreen(game, selectedTeam, rakip, QuarterFinal.this));
+                        game.setScreen(new MatchScreen(game, selectedTeam, rakip, QuarterFinal.this));
                         break;
                     }
                 }
@@ -97,16 +104,20 @@ public class QuarterFinal extends BaseScreen implements GameScreen {
         roadImage.setPosition((screenWidth - roadImage.getWidth()) / 2f, screenHeight - roadImage.getHeight() - 75);
         stage.addActor(roadImage);
 
+
+        //Her lige özel kupa resmi.
         Image trophyImage = new Image(game.assetManager.get(trophyPath, Texture.class));
         trophyImage.setSize(350, 350);
         trophyImage.setPosition((screenWidth - 350) / 2f, 375);
         stage.addActor(trophyImage);
 
-        addBackButton(() -> {
+        addgeri(() -> {
             game.setScreen(new TeamSelectionScreen(game, shuffledTeams.toArray(new String[0]), imagePath, trophyPath,leagueName));
         });
     }
 
+
+    //Maç bittikten sonraki aşamalar.
     @Override
     public void onGameEnd(boolean playerWon, String opponentTeam) {
         String winner = playerWon ? selectedTeam : opponentTeam;

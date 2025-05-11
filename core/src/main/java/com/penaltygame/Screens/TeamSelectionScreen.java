@@ -80,7 +80,7 @@ public class TeamSelectionScreen extends BaseScreen {
         }
 
         // Back tuşu
-        addBackButton(() -> game.setScreen(new LeagueSelectionScreen(game)));
+        addgeri(() -> game.setScreen(new LeagueSelectionScreen(game)));
     }
 
 }

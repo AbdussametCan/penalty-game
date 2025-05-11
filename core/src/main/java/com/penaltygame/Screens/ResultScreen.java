@@ -17,6 +17,7 @@ public class ResultScreen extends BaseScreen {
     private Texture resultTexture;
     private Texture trophyTexture;
 
+    //Turnuva sonucuna göre şampiyonluk veya mağlubiyet ekranı.
     public ResultScreen(PenaltyGame game, boolean playerWon, String leagueName) {
         super(game);
         this.playerWon = playerWon;
@@ -26,13 +27,13 @@ public class ResultScreen extends BaseScreen {
     @Override
     protected void addContent() {
         if (!playerWon) {
-            // Lose ekranı
+            // Kaybetme ekranı.
             resultTexture = new Texture(Gdx.files.internal("InterfacePng/Result/lose.png"));
             Image resultImage = new Image(resultTexture);
             resultImage.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             stage.addActor(resultImage);
 
-            // Try Again tıklama alanı (örnek koordinatlar ve boyut, ihtiyaca göre değiştir)
+            // 'TRY AGAIN' tuşuna bastığımda başlangıç ekranına atıyor.
             ImageButton invisibleButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("InterfacePng/Result/seffaf.png")))));
             invisibleButton.setSize(300, 100);
             invisibleButton.setPosition((Gdx.graphics.getWidth() - 300) / 2f, 150);
@@ -47,13 +48,13 @@ public class ResultScreen extends BaseScreen {
             stage.addActor(invisibleButton);
         }
         else {
-            // Win ekranı arka plan
+            // Şampiyonluk ekranı.
             resultTexture = new Texture(Gdx.files.internal("InterfacePng/Result/win.png"));
             Image winBg = new Image(resultTexture);
             winBg.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             stage.addActor(winBg);
 
-            // Kupa görseli
+            // Her lige özel kupa resmi.
             String cupPath;
             switch (leagueName) {
                 case "Champions League":
@@ -78,7 +79,7 @@ public class ResultScreen extends BaseScreen {
             trophyImage.setPosition((Gdx.graphics.getWidth() - 500) / 2f, 310);
             stage.addActor(trophyImage);
 
-            // YOU WIN yazısı için görünmez tıklama alanı
+            // 'YOU WİN' tuşuna bastığımda başlangıç ekranına atıyor.
             Texture transparent = new Texture(Gdx.files.internal("InterfacePng/Result/seffaf.png"));
             ImageButton winButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(transparent)));
             winButton.setSize(300, 100);
@@ -106,6 +107,6 @@ public class ResultScreen extends BaseScreen {
 
     @Override
     public void onGameEnd(boolean playerWon, String opponentTeam) {
-        // Bu ekran oyunun sonunda tekrar çağrılmıyor
+        // Bu ekranın sonunda bir şey olmadığı için çalışmıyor.
     }
 }

@@ -18,11 +18,13 @@ public abstract class BaseScreen implements GameScreen {
 
     protected final PenaltyGame game;
     protected Stage stage;
-    private boolean soundOn = true;
-    private ImageButton soundButton;
-    private ImageButton nextButton;
-    private ImageButton backButton;
+    private boolean sesAc = true;
+    private ImageButton sesButonu;
+    private ImageButton sonraki;
+    private ImageButton geri;
 
+
+    //Buton ölçüleri ve fonksiyonlarının bulunduğu sınıf.
     public BaseScreen(PenaltyGame game) {
         this.game = game;
     }
@@ -37,23 +39,24 @@ public abstract class BaseScreen implements GameScreen {
         background.setFillParent(true);
         stage.addActor(background);
 
-        addSoundButton();
-        addNextButton();
+        addsesButonu();
+        addsonraki();
         addExitButton();
-        addContent(); // içerik
+        addContent();
     }
 
     protected abstract void addContent();
 
-    protected void addBackButton(Runnable onClickAction) {
+    //Geri butonu.
+    protected void addgeri(Runnable onClickAction) {
         Texture backTexture = game.assetManager.get("InterfacePng/back.png", Texture.class);
-        backButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(backTexture)));
+        geri = new ImageButton(new TextureRegionDrawable(new TextureRegion(backTexture)));
 
         float buttonSize = 200f;
-        backButton.setSize(buttonSize, buttonSize);
-        backButton.setPosition((Gdx.graphics.getWidth() - buttonSize) / 2f, 40);
+        geri.setSize(buttonSize, buttonSize);
+        geri.setPosition((Gdx.graphics.getWidth() - buttonSize) / 2f, 40);
 
-        backButton.addListener(new ClickListener() {
+        geri.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (onClickAction != null) {
@@ -62,10 +65,11 @@ public abstract class BaseScreen implements GameScreen {
             }
         });
 
-        stage.addActor(backButton);
+        stage.addActor(geri);
     }
 
-    private void addSoundButton() {
+    //Ses butonları.
+    private void addsesButonu() {
         Texture soundOnTexture = game.assetManager.get("InterfacePng/soundOn.png", Texture.class);
         Texture soundOffTexture = game.assetManager.get("InterfacePng/soundOff.png", Texture.class);
 
@@ -74,36 +78,39 @@ public abstract class BaseScreen implements GameScreen {
         TextureRegionDrawable soundDrawable = new TextureRegionDrawable(new TextureRegion(soundOnTexture));
         soundDrawable.setMinSize(buttonSize, buttonSize);
 
-        soundButton = new ImageButton(soundDrawable);
-        soundButton.setSize(buttonSize, buttonSize);
-        soundButton.setPosition(Gdx.graphics.getWidth() - buttonSize - 20, Gdx.graphics.getHeight() - buttonSize - 20);
+        sesButonu = new ImageButton(soundDrawable);
+        sesButonu.setSize(buttonSize, buttonSize);
+        sesButonu.setPosition(Gdx.graphics.getWidth() - buttonSize - 20, Gdx.graphics.getHeight() - buttonSize - 20);
 
-        soundButton.addListener(new ClickListener() {
+        sesButonu.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                soundOn = !soundOn;
-                Texture newTexture = soundOn ? soundOnTexture : soundOffTexture;
+                sesAc = !sesAc;
+                Texture newTexture = sesAc ? soundOnTexture : soundOffTexture;
                 TextureRegionDrawable newDrawable = new TextureRegionDrawable(new TextureRegion(newTexture));
                 newDrawable.setMinSize(buttonSize, buttonSize);
-                soundButton.getStyle().imageUp = newDrawable;
+                sesButonu.getStyle().imageUp = newDrawable;
 
-                toggleVolume(soundOn);
+                toggleVolume(sesAc);
             }
         });
 
-        stage.addActor(soundButton);
+        stage.addActor(sesButonu);
     }
 
+
+    //Sesi açıp kapatma.
     private void toggleVolume(boolean isOn) {
         Music currentMusic = game.getCurrentMusic();
         if (currentMusic != null) {
-            currentMusic.setVolume(isOn ? 1.0f : 0.0f); // ✅ sesi sıfırla veya geri getir
+            currentMusic.setVolume(isOn ? 1.0f : 0.0f);
             if (!currentMusic.isPlaying()) {
-                currentMusic.play(); // çalmıyorsa başlat
+                currentMusic.play();
             }
         }
     }
 
+    //Çıkış butonu.
     private void addExitButton() {
         Texture exitTexture = game.assetManager.get("InterfacePng/exit.png", Texture.class);
         float buttonSize = 120f;
@@ -125,25 +132,26 @@ public abstract class BaseScreen implements GameScreen {
         stage.addActor(exitButton);
     }
 
-    private void addNextButton() {
+    //Sonraki şarkıya geçiş.
+    private void addsonraki() {
         Texture nextTexture = game.assetManager.get("InterfacePng/next.png", Texture.class);
         float buttonSize = 115f;
 
         TextureRegionDrawable nextDrawable = new TextureRegionDrawable(new TextureRegion(nextTexture));
         nextDrawable.setMinSize(buttonSize, buttonSize);
 
-        nextButton = new ImageButton(nextDrawable);
-        nextButton.setSize(buttonSize, buttonSize);
-        nextButton.setPosition(Gdx.graphics.getWidth() - (buttonSize * 2) - 40, Gdx.graphics.getHeight() - buttonSize - 20);
+        sonraki = new ImageButton(nextDrawable);
+        sonraki.setSize(buttonSize, buttonSize);
+        sonraki.setPosition(Gdx.graphics.getWidth() - (buttonSize * 2) - 40, Gdx.graphics.getHeight() - buttonSize - 20);
 
-        nextButton.addListener(new ClickListener() {
+        sonraki.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.skipToNextSong();
             }
         });
 
-        stage.addActor(nextButton);
+        stage.addActor(sonraki);
     }
 
     @Override

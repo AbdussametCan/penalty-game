@@ -52,7 +52,7 @@ public class LeagueSelectionScreen extends BaseScreen {
             "InterfacePng/worldcup.png",
             "InterfacePng/Trophy/worldtrophy.png");
 
-        addBackButton(() -> game.setScreen(new OpeningScreen(game)));
+        addgeri(() -> game.setScreen(new OpeningScreen(game)));
     }
 
     private void addLeagueButton(Table table, String leagueName, Skin skin, String[] teams, String imagePath, String trophyPath) {

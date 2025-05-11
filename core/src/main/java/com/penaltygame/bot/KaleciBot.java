@@ -7,22 +7,26 @@ public class KaleciBot {
     private String yukseklik = "alt";     // alt, üst
     private Random random = new Random();
 
-    // Oyuncunun gerçek yönüne göre %50 tahmin etsin
+    // Oyuncunun gerçek yönüne göre %50 tahmin eder
     public void yeniYonSec(String topYonGercek) {
-        boolean dogruTahmin = random.nextBoolean(); // %50 ihtimalle true
+        boolean dogruTahmin = random.nextBoolean();
         if (dogruTahmin) {
             secilenYon = topYonGercek;
-        } else {
+        }
+        else {
             String[] digerYonler;
-            switch (topYonGercek) {
+            switch (topYonGercek) {  //yönler tanımlandı.
                 case "left":
-                    digerYonler = new String[]{"center", "right"};
+                    digerYonler = new String[]{
+                        "center", "right"};
                     break;
                 case "center":
-                    digerYonler = new String[]{"left", "right"};
+                    digerYonler = new String[]{
+                        "left", "right"};
                     break;
                 default:
-                    digerYonler = new String[]{"left", "center"};
+                    digerYonler = new String[]{
+                        "left", "center"};
                     break;
             }
 
@@ -30,7 +34,7 @@ public class KaleciBot {
         }
     }
 
-    public void yukseklikAyarla(float topY) {
+    public void yukseklikAyarla(float topY) { // Yükseklik ayarı yapar.
         yukseklik = topY < 500 ? "alt" : "üst";
     }
 
@@ -38,15 +42,12 @@ public class KaleciBot {
         return secilenYon;
     }
 
-    public String getYukseklik() {
-        return yukseklik;
-    }
 
-    public String getTextureKey() {
-        // "center" yönüne "orta" ismini döndür
-        if (secilenYon.equals("center")) {
-            return "orta";
+    public String getResimAnahtari() { //Uygun pozisyon ile uygun resmi birleştirir.
+        switch (secilenYon) {
+            case "left": return "sol_" + yukseklik;
+            case "right": return "sag_" + yukseklik;
+            default: return "orta";
         }
-        return secilenYon + "_" + yukseklik;
     }
 }

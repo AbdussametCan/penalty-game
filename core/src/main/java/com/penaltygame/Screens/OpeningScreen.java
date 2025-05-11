@@ -10,16 +10,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.penaltygame.PenaltyGame;
 
-public class OpeningScreen extends com.penaltygame.Screens.BaseScreen {
+public class OpeningScreen extends BaseScreen {
 
     public OpeningScreen(PenaltyGame game) {
         super(game);
     }
-    @Override
-    public void onGameEnd(boolean playerWon, String opponentTeam) {
-        // Bu ekran için gerekli değilse boş bırakılabilir
-    }
-
 
     @Override
     protected void addContent() {
@@ -28,12 +23,11 @@ public class OpeningScreen extends com.penaltygame.Screens.BaseScreen {
         table.center();
         stage.addActor(table);
 
-        // Başlık
         Texture titleTexture = game.assetManager.get("InterfacePng/photo.png", Texture.class);
         Image title = new Image(titleTexture);
-        table.add(title).padBottom(30).row();  // -50 yerine +30 gibi pozitif değer daha güvenli
+        table.add(title).padBottom(30).row();
 
-        // Start butonu
+        // Start butonu.
         Texture startBtnTexture = game.assetManager.get("InterfacePng/start.png", Texture.class);
         ImageButton startButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(startBtnTexture)));
 
@@ -45,5 +39,10 @@ public class OpeningScreen extends com.penaltygame.Screens.BaseScreen {
         });
 
         table.add(startButton).padBottom(-235).row();
+    }
+
+    @Override
+    public void onGameEnd(boolean playerWon, String opponentTeam) {
+        // Bu ekranın sonunda bir şey olmadığı için çalışmıyor.
     }
 }

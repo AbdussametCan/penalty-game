@@ -11,7 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.penaltygame.PenaltyGame;
 import com.penaltygame.GameScreen;
-import com.penaltygame.Shoot.FirstScreen;
+import com.penaltygame.Shoot.MatchScreen;
 
 import java.util.List;
 
@@ -46,7 +46,7 @@ public class FinalScreen extends BaseScreen implements GameScreen {
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
 
-        // Bracket arka planı
+        //Eşleşme tablosu aktarılır.
         Texture bracketTexture = new Texture(Gdx.files.internal("bracket.png"));
         Image bracketImage = new Image(bracketTexture);
         bracketImage.setSize(bracketTexture.getWidth() * 1.5f, bracketTexture.getHeight() * 1.5f);
@@ -55,7 +55,7 @@ public class FinalScreen extends BaseScreen implements GameScreen {
 
 
 
-        // Çeyrek final (quarter) takımları
+        // Takım isimlerinin fikstürdeki konumları.
         float[][] quarterPositions = {
             {90, 685}, {90, 575}, {90, 461}, {90, 350},
             {screenWidth - 255, 685}, {screenWidth - 255, 575}, {screenWidth - 255, 461}, {screenWidth - 255, 350}
@@ -67,7 +67,7 @@ public class FinalScreen extends BaseScreen implements GameScreen {
             stage.addActor(btn);
         }
 
-        // Yarı final (semi) takımları
+
         float[][] semiPositions = {
             {375, 630}, {375, 406},
             {screenWidth - 540, 630}, {screenWidth - 540, 406}
@@ -79,7 +79,7 @@ public class FinalScreen extends BaseScreen implements GameScreen {
             stage.addActor(btn);
         }
 
-        // Finalistlerin pozisyonları
+
         float[][] finalPositions = {
             {665, 517}, {screenWidth - 827, 517}
         };
@@ -95,7 +95,7 @@ public class FinalScreen extends BaseScreen implements GameScreen {
         rightBtn.setPosition(finalPositions[1][0], finalPositions[1][1]);
         stage.addActor(rightBtn);
 
-        // Play butonu
+        //Play butonu.
         Texture playTexture = game.assetManager.get("InterfacePng/play.png", Texture.class);
         ImageButton playButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(playTexture)));
         playButton.setSize(300, 150);
@@ -103,12 +103,12 @@ public class FinalScreen extends BaseScreen implements GameScreen {
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new FirstScreen(game, playerTeam, opponentTeam, FinalScreen.this));
+                game.setScreen(new MatchScreen(game, playerTeam, opponentTeam, FinalScreen.this));
             }
         });
         stage.addActor(playButton);
 
-        // Kupa ve yol görseli
+        //Her lige özel kupa resmi.
         Texture trophyTexture = game.assetManager.get(trophyPath, Texture.class);
         Image trophyImage = new Image(trophyTexture);
         trophyImage.setSize(350, 350);
@@ -138,6 +138,7 @@ public class FinalScreen extends BaseScreen implements GameScreen {
         return btn;
     }
 
+    //Maç bittikten sonraki aşamalar.
     @Override
     public void onGameEnd(boolean playerWon, String opponentTeam) {
         game.setScreen(new ResultScreen(game, playerWon, leagueName));
