@@ -83,6 +83,9 @@ public class Shoot {
             height * power * 900
         );
         this.isShooting = true;
+
+        // 🔧 Buraya yön ataması ekle
+        topYonu = angle < 60 ? "right" : angle > 120 ? "left" : "orta";
     }
 
 
@@ -150,5 +153,15 @@ public class Shoot {
 
     public String getTopYonu() {
         return topYonu;
+    }
+    public String getTopYonKey() {
+        String yukseklik = getBallPosition().y < 500 ? "alt" : "üst";
+        switch (topYonu) {
+            case "left": return "sol_" + yukseklik;
+            case "right": return "sag_" + yukseklik;
+            case "center": return "orta";
+            default:
+                return "orta";
+        }
     }
 }

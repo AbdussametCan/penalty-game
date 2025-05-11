@@ -7,47 +7,60 @@ public class KaleciBot {
     private String yukseklik = "alt";     // alt, üst
     private Random random = new Random();
 
-    // Oyuncunun gerçek yönüne göre %50 tahmin eder
+    public void setSecilenYon(String yon){
+        this.secilenYon = yon;
+    }
+
+    public void setYukseklik(String yukseklik){
+        this.yukseklik = yukseklik;
+    }
+
+    // Oyuncunun gerçek yönüne göre %50 ihtimalle doğru tahmin yapar
     public void yeniYonSec(String topYonGercek) {
         boolean dogruTahmin = random.nextBoolean();
         if (dogruTahmin) {
             secilenYon = topYonGercek;
-        }
-        else {
+        } else {
             String[] digerYonler;
-            switch (topYonGercek) {  //yönler tanımlandı.
+            switch (topYonGercek) {
                 case "left":
-                    digerYonler = new String[]{
-                        "center", "right"};
+                    digerYonler = new String[]{"center", "right"};
                     break;
                 case "center":
-                    digerYonler = new String[]{
-                        "left", "right"};
+                    digerYonler = new String[]{"left", "right"};
                     break;
                 default:
-                    digerYonler = new String[]{
-                        "left", "center"};
+                    digerYonler = new String[]{"left", "center"};
                     break;
             }
-
             secilenYon = digerYonler[random.nextInt(2)];
         }
     }
 
-    public void yukseklikAyarla(float topY) { // Yükseklik ayarı yapar.
+    public void yukseklikAyarla(float topY) {
         yukseklik = topY < 500 ? "alt" : "üst";
     }
 
-    public String getSecilenYon() {
-        return secilenYon;
-    }
-
-
-    public String getResimAnahtari() { //Uygun pozisyon ile uygun resmi birleştirir.
+    // Görsel için kullanılan sprite anahtarını döndürür
+    public String getResimAnahtari() {
         switch (secilenYon) {
             case "left": return "sol_" + yukseklik;
             case "right": return "sag_" + yukseklik;
             default: return "orta";
         }
     }
+
+    // Kalecinin gerçek yön tahminini döndürür — Shoot sınıfı ile karşılaştırmada kullanılır
+    public String getYonAnahtari() {
+        switch (secilenYon) {
+            case "left": return "sol_" + yukseklik;
+            case "right": return "sag_" + yukseklik;
+            default: return "orta";
+        }
+    }
+
+    public String getSecilenYon() {
+        return secilenYon;
+    }
 }
+

@@ -23,28 +23,41 @@ public class Kaleci {
         pozisyonlar.put("sag_üst", manager.get("Kaleci/sag_üst.png", Texture.class));
     }
 
-    //Aşağıda kaleci ile ilgili metotlar var.
+    // Oyuncunun gerçek yönüne göre kalecinin yön seçmesini sağlar
     public void yeniYonSec(String topYonGercek) {
         bot.yeniYonSec(topYonGercek);
     }
 
+    // Topun yüksekliğine göre kalecinin alt/üst sıçrama kararını belirler
     public void yukseklikAyarla(float topY) {
         bot.yukseklikAyarla(topY);
     }
 
+    // Kalecinin seçtiği yön (left, center, right)
     public String getSecilenYon() {
         return bot.getSecilenYon();
     }
 
+    // Kalecinin sprite görüntüsünü döndürür
     public Texture getPozisyonResmi() {
         String key = bot.getResimAnahtari();
         Texture texture = pozisyonlar.get(key);
 
         if (texture == null) {
-            System.err.println("⚠ Kaleci pozisyon görseli bulunamadı → key: " + key);
             return pozisyonlar.get("orta");
         }
 
         return texture;
+    }
+
+    // Kalecinin tahmin ettiği tam yön anahtarı (örneğin: "sol_alt", "sag_üst")
+    public String getYonAnahtari() {
+        return bot.getYonAnahtari();
+    }
+
+    // Kaleci yön ve yüksekliğini sıfırlar (her el sonrası çağrılabilir)
+    public void resetPozisyon() {
+        bot.setSecilenYon("center");
+        bot.setYukseklik("alt");
     }
 }

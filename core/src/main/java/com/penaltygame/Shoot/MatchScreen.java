@@ -165,6 +165,8 @@ public class MatchScreen implements Screen {
         clickStage = 0;
         kaleciKararVerdi = false;
         shoot.reset();
+        kaleci.resetPozisyon();
+        oyuncuKaleciX = 860;
     }
 
 
@@ -235,7 +237,9 @@ public class MatchScreen implements Screen {
             Rectangle kaleAlan = kale.getAlan();
 
             if (oyuncuSirasi) {
-                if (kaleAlan.contains(topPozisyon) && shoot.getVelocity().len() > 50f && shoot.isSaved(kaleci.getSecilenYon())) {
+                if (kaleAlan.contains(topPozisyon) && shoot.getVelocity().len() > 50f &&
+                    shoot.getTopYonKey().equals(kaleci.getYonAnahtari())) {
+
                     kurtardi = true;
                     skorBoard.addShot(true, false);
                     mesajTimer = 2f;
@@ -279,7 +283,25 @@ public class MatchScreen implements Screen {
         Vector2 pos = shoot.getBallPosition();
         game.batch.draw(ballTexture, pos.x - 16, pos.y - 16, 32, 32);
 
-        float kaleciX = oyuncuSirasi ? kale.getAlan().x + (kale.getAlan().width - 200) / 2f : oyuncuKaleciX;
+        float kaleciX;
+
+        if (oyuncuSirasi) {
+            // Kalecinin tahmin ettiği yöne göre pozisyon belirle
+            String kaleciYon = kaleci.getSecilenYon();
+            if (kaleciYon.equals("left")) {
+                kaleciX = kale.getAlan().x + 10;
+            }
+            else if (kaleciYon.equals("right")) {
+                kaleciX = kale.getAlan().x + kale.getAlan().width - 200 - 10;
+            }
+            else { // center
+                kaleciX = kale.getAlan().x + (kale.getAlan().width - 200) / 2f;
+            }
+        }
+        else {
+            // Bot şut çekiyorsa oyuncu kalecisinin pozisyonu
+            kaleciX = oyuncuKaleciX;
+        }
         float kaleciY = kale.getAlan().y - 50;
         game.batch.draw(kaleci.getPozisyonResmi(), kaleciX, kaleciY, 200, 240);
 
